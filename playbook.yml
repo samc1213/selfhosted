@@ -1,0 +1,23 @@
+- name: My first play
+  hosts: "{{ target if target is defined else 'production' }}"
+  vars:
+    samtestdest: /usr/local/bin/samtest.sh
+  roles:
+    - role: systemdtimer
+      vars:
+        systemdtimer_servicename: testtimer
+        systemdtimer_oncalendar: "*-*-* *:*:00"
+        systemdtimer_command: "{{ samtestdest }}"
+
+  tasks:
+    - name: Deploy samtest
+      ansible.builtin.copy:
+        dest: "{{ samtestdest }}"
+        content: |
+          #!/bin/bash
+          echo "hi sam"
+        mode: '0755'
+
+    - name: Print message
+      ansible.builtin.debug:
+        msg: Hello world

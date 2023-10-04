@@ -1,0 +1,9 @@
+[Unit]
+Description="{{ systemdtimer_servicename }}"
+
+[Timer]
+OnCalendar={{ systemdtimer_oncalendar }}
+Unit={{ systemdtimer_servicename }}.service
+
+[Install]
+WantedBy=multi-user.target

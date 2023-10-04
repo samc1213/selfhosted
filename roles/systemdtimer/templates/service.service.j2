@@ -1,0 +1,6 @@
+[Unit]
+Description="{{ systemdtimer_servicename }}"
+
+[Service]
+Type=oneshot
+ExecStart={{ systemdtimer_command }}

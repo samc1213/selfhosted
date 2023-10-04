@@ -1,0 +1,7 @@
+galaxy_info:
+  author: Sam Cohen
+  description: Install a systemd timer
+
+  license: MIT
+
+  min_ansible_version: '2.1'
