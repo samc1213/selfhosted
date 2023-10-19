@@ -1,0 +1,38 @@
+- name: Backup OCI block volume
+  hosts: "{{ target if target is defined else 'production' }}"
+  vars:
+    backup_oci_path: /usr/local/bin/backup-oci-bv.sh
+  roles:
+    - role: systemdtimer
+      vars:
+        systemdtimer_servicename: backup-oci-block
+        systemdtimer_oncalendar: "*-*-* 21:02:00 America/Denver"
+        systemdtimer_command: "{{ backup_oci_path }}"
+        systemdtimer_user: sam
+  tasks:
+    - name: Install jq
+      become: true
+      become_user: root
+      ansible.builtin.apt:
+        name: jq
+    - name: Install OCI
+      ansible.builtin.command:
+        cmd: bash -c "$(curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh)"
+        creates: /home/sam/bin/oci
+    - name: Configure OCI config
+      ansible.builtin.copy:
+        src: files/oci_config
+        dest: ~/.oci/config
+        decrypt: true
+        mode: '600'
+    - name: Configure OCI CLI config
+      ansible.builtin.blockinfile:
+        path: ~/.oci/oci_cli_rc
+        block: |
+          [DEFAULT]
+          compartment-id={{ oci_compartment_id }}
+    - name: Copy backup job script
+      ansible.builtin.copy:
+        src: files/backup-oci-bv.sh
+        dest: "{{ backup_oci_path }}"
+        mode: '700'
