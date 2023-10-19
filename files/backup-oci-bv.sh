@@ -1,14 +1,12 @@
 #!/bin/bash
 set -e
+set -o pipefail
 # Inspired by https://blogs.oracle.com/developers/post/backing-up-your-always-free-vms-in-the-oracle-cloud
-
-PROFILE_NAME=DEFAULT
 TMP_BACKUP_NAME=$(date +%Y-%m-%d_%H-%M-%S)
 
 echo "Running at ${TMP_BACKUP_NAME}."
-echo "Getting previous backup..."
 
-BLOCK_VOLUMES=$(/home/sam/bin/oci bv volume list)
+BLOCK_VOLUMES=$(/home/sam/bin/oci bv volume list --lifecycle-state AVAILABLE)
 BLOCK_VOLUMES_COUNT=$(echo "${BLOCK_VOLUMES}" | jq '.data | length')
 if [ $BLOCK_VOLUMES_COUNT != 1 ]; then
     echo "Expected exactly one block volume. Given ${BLOCK_VOLUMES_COUNT}"
@@ -17,14 +15,8 @@ fi
 BLOCK_VOLUME_ID=$(echo "${BLOCK_VOLUMES}" | jq -r '.data[0].id')
 
 echo "Creating new backup..."
-NEW_BACKUP_ID=$(/home/sam/bin/oci bv backup create --volume-id ${BLOCK_VOLUME_ID} --type FULL --display-name ${TMP_BACKUP_NAME} --wait-for-state AVAILABLE --query "data.id")
-
-if [ -z "$NEW_BACKUP_ID" ]; then
-    echo "New backup creation failed...Exiting script!"
-    exit 2
-else
-    echo "New backup id: $NEW_BACKUP_ID"
-fi
+NEW_BACKUP_VOLUME_ID=$(/home/sam/bin/oci bv backup create --volume-id ${BLOCK_VOLUME_ID} --type FULL --display-name ${TMP_BACKUP_NAME} --wait-for-state AVAILABLE --query "data.id" | tr -d '"')
+echo "New backup volume id: $NEW_BACKUP_VOLUME_ID"
 
 NUM_BACKUPS=$(/home/sam/bin/oci bv backup list --lifecycle-state AVAILABLE | jq '.data | length')
 if [ -z "$NUM_BACKUPS" ]; then
@@ -39,4 +31,37 @@ else
     /home/sam/bin/oci bv backup delete --force --volume-backup-id ${OLDEST_BACKUP_ID} --wait-for-state TERMINATED
 fi
 
-echo "Backup process complete! Goodbye!"
+echo "Backup process complete! Will mount backup and transfer to BackBlaze"
+
+NEW_VOLUME_ID=$(/home/sam/bin/oci bv volume create --volume-backup-id "$NEW_BACKUP_VOLUME_ID" --availability-domain "qyou:US-ASHBURN-AD-3" --wait-for-state AVAILABLE --query "data.id" | tr -d '"')
+
+NUM_INSTANCES=$(/home/sam/bin/oci compute instance list | jq '.data | length')
+if [ $NUM_INSTANCES -ne 1 ]; then
+    echo "Cannot find this instance. Expected 1, given $NUM_INSTANCES"
+    exit 3
+fi
+THIS_INSTANCE=$(/home/sam/bin/oci compute instance list | jq -r '.data[0].id')
+
+NEW_VOLUME_ATTACHMENT_DATA=$(/home/sam/bin/oci compute volume-attachment attach-iscsi-volume  --instance-id "$THIS_INSTANCE" --volume-id "$NEW_VOLUME_ID" --is-agent-auto-iscsi-login-enabled true --wait-for-state ATTACHED)
+NEW_VOLUME_ATTACHMENT_IQN=$(echo $NEW_VOLUME_ATTACHMENT_DATA  | jq -r '.data.iqn')
+while ! sudo ls /dev/disk/by-path/*${NEW_VOLUME_ATTACHMENT_IQN}* > /dev/null; do
+    echo "Disk still not attached. Waiting...";
+    sleep 5
+done
+
+echo "Disk attached for $NEW_VOLUME_ATTACHMENT_IQN"
+
+sudo mkdir -p /blkstgbak
+sudo mount -t auto /dev/disk/by-path/*${NEW_VOLUME_ATTACHMENT_IQN}* /blkstgbak
+
+echo "Copying via rclone..."
+sudo rclone copy --fast-list --no-check-dest --ignore-size --transfers 24 --b2-chunk-size 256M /blkstgbak backblaze_oci_backup:oci-backup/${TMP_BACKUP_NAME} -v
+echo "Done copying"
+
+sudo umount /dev/disk/by-path/*${NEW_VOLUME_ATTACHMENT_IQN}*
+
+NEW_VOLUME_ATTACHMENT_ID=$(echo $NEW_VOLUME_ATTACHMENT_DATA | jq -r '.data.id')
+/home/sam/bin/oci compute volume-attachment detach --volume-attachment-id $NEW_VOLUME_ATTACHMENT_ID --wait-for-state DETACHED --force
+/home/sam/bin/oci bv volume delete --volume-id $NEW_VOLUME_ID --wait-for-state TERMINATED --force
+
+echo "Done with backup"

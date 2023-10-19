@@ -6,7 +6,7 @@
     - role: systemdtimer
       vars:
         systemdtimer_servicename: backup-oci-block
-        systemdtimer_oncalendar: "*-*-* 21:02:00 America/Denver"
+        systemdtimer_oncalendar: "*-*-* 08:00:00 America/Denver"
         systemdtimer_command: "{{ backup_oci_path }}"
         systemdtimer_user: sam
   tasks:
@@ -31,6 +31,45 @@
         block: |
           [DEFAULT]
           compartment-id={{ oci_compartment_id }}
+    - name: Configure BVM
+      register: installbvmout
+      ansible.builtin.shell:
+        cmd: |
+          set -o pipefail
+          if [ $(oci compute instance list | jq -r '.data[0]."agent-config"."plugins-config" |
+            .[] | select(.name == "Block Volume Management") | ."desired-state"') != "ENABLED" ]; then
+            oci compute instance update --instance-id $(oci compute instance list | jq -r '.data[0].id') \
+              --agent-config '{ "is-agent-disabled": false, "plugins-config": [ {"name": "Block Volume Management", "desiredState": "ENABLED" } ] }' --force
+            echo "Updated BVM"
+          else
+            echo "BVM Already Set"
+          fi
+        executable: /bin/bash
+      changed_when: "'Updated BVM' in installbvmout.stdout"
+    - name: Check rclone installation
+      ansible.builtin.stat:
+        path: /usr/bin/rclone
+      register: rclone_file
+    - name: Download rclone
+      ansible.builtin.get_url:
+        url: https://rclone.org/install.sh
+        dest: /tmp/rcloneinstall.sh
+        mode: '755'
+      when: rclone_file.stat.exists is not true
+    - name: Install rclone
+      become: true
+      become_user: root
+      ansible.builtin.command:
+        cmd: cat /tmp/rcloneinstall.sh | bash
+        creates: /usr/bin/rclone
+    - name: Configure rclone
+      become: true
+      become_user: root
+      ansible.builtin.copy:
+        src: files/rclone.conf
+        dest: /root/.config/rclone/rclone.conf
+        decrypt: true
+        mode: '777'
     - name: Copy backup job script
       ansible.builtin.copy:
         src: files/backup-oci-bv.sh
