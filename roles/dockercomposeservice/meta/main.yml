@@ -1,0 +1,7 @@
+galaxy_info:
+  author: Sam Cohen
+  description: Create and start a docker compose service
+
+  license: MIT
+
+  min_ansible_version: '2.1'

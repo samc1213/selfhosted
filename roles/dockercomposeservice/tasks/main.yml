@@ -1,0 +1,36 @@
+---
+- name: Create directory
+  ansible.builtin.file:
+    path: ~/compose/{{ dockercomposeservice_name }}
+    state: directory
+    mode: '755'
+- name: Check local compose jinja file
+  delegate_to: localhost
+  stat:
+    path: files/{{ dockercomposeservice_name }}-docker-compose.yml.j2
+  register: stat_jinja_compose
+- name: Check local compose file
+  delegate_to: localhost
+  stat:
+    path: files/{{ dockercomposeservice_name }}-docker-compose.yml
+  register: stat_compose
+- name: Copy Compose jinja file
+  ansible.builtin.template:
+    src: files/{{ dockercomposeservice_name }}-docker-compose.yml.j2
+    dest: ~/compose/{{ dockercomposeservice_name }}/docker-compose.yml
+    mode: '644'
+  when: stat_jinja_compose.stat.exists
+- name: Copy Compose file
+  ansible.builtin.template:
+    src: files/{{ dockercomposeservice_name }}-docker-compose.yml
+    dest: ~/compose/{{ dockercomposeservice_name }}/docker-compose.yml
+    mode: '644'
+  when: stat_compose.stat.exists
+- name: Fail if no compose file
+  ansible.builtin.fail:
+  when: stat_jinja_compose.stat.exists is false and stat_compose.stat.exists is false
+- name: Create and start services
+  community.docker.docker_compose:
+    project_src: ~/compose/{{ dockercomposeservice_name }}
+    files:
+      - docker-compose.yml

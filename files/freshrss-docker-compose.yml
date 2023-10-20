@@ -1,0 +1,19 @@
+version: "2.4"
+
+services:
+
+  freshrss:
+    image: freshrss/freshrss:custom
+    container_name: freshrss
+    hostname: freshrss
+    ports:
+      - "8281:80"
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: 10m
+    volumes:
+      - /blkstg/freshrss-data/:/var/www/FreshRSS/data
+    environment:
+      TZ: America/Denver
+      CRON_MIN: '1,31'

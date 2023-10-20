@@ -1,0 +1,23 @@
+version: '3'
+services:
+  wallabag:
+    image: wallabag/wallabag
+    container_name: wallabag
+    restart: unless-stopped
+    environment:
+      - SYMFONY__ENV__MAILER_HOST="smtp.gmail.com"
+      - SYMFONY__ENV__MAILER_ENCRYPTION="tls"
+      - SYMFONY__ENV__MAILER_PORT="587"
+      - SYMFONY__ENV__MAILER_USER="{{ email_user }}"
+      - SYMFONY__ENV__MAILER_PASSWORD="{{ email_password }}"
+      - SYMFONY__ENV__DOMAIN_NAME="https://wallabag.samacohen.com"
+      - SYMFONY__ENV__FROM_EMAIL="wallabag@wallabag.samacohen.com"
+    ports:
+      - "0.0.0.0:8282:80"
+    volumes:
+      - /blkstg/wallabag-data/data/:/var/www/wallabag/data
+      - /blkstg/wallabag-data/images/:/var/www/wallabag/web/assets/images
+    healthcheck:
+      test: ["CMD", "wget" ,"--no-verbose", "--tries=1", "--spider", "http://localhost"]
+      interval: 1m
+      timeout: 3s

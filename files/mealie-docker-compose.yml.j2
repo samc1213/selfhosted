@@ -1,0 +1,43 @@
+version: "3.7"
+services:
+  mealie-frontend:
+    image: hkotel/mealie:frontend-v1.0.0beta-5
+    container_name: mealie-frontend
+    environment:
+      - API_URL=http://mealie-api:9000
+
+    restart: unless-stopped
+    ports:
+      - "8283:3000" # 
+
+
+    volumes:
+      - /blkstg/mealie-data:/app/data/ # 
+
+
+  mealie-api:
+    image: hkotel/mealie:api-v1.0.0beta-5
+    container_name: mealie-api
+    deploy:
+      resources:
+        limits:
+          memory: 1000M
+
+    volumes:
+      - /blkstg/mealie-data:/app/data/
+    environment:
+      - ALLOW_SIGNUP=true
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Denver
+      - MAX_WORKERS=1
+      - WEB_CONCURRENCY=1
+      - BASE_URL=https://mealie.samacohen.com
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_AUTH_STRATEGY=TLS
+      - SMTP_FROM_EMAIL={{ email_user }}
+      - SMTP_FROM_NAME={{ email_user }}
+      - SMTP_USER={{ email_user }}
+      - SMTP_PASSWORD={{ email_password }}
+    restart: unless-stopped

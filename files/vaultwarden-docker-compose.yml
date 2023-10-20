@@ -1,0 +1,12 @@
+version: '3.4'
+
+services:
+
+  vaultwarden:
+    container_name: vaultwarden
+    image: vaultwarden/server:latest
+    restart: always
+    ports:
+      - '127.0.0.1:8280:80'
+    volumes:
+      - /blkstg/vw-data:/data/

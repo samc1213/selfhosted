@@ -6,3 +6,4 @@
 <some ip or FQDN>
 ```
 2. To run commands, use `ansible-playbook -e @secrets_file.enc --ask-vault-pass -i inventory/hosts <playbook_name>`
+3. Install docker: `ansible-galaxy collection install community.docker`

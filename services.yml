@@ -1,0 +1,20 @@
+- name: Setup services
+  hosts: "{{ target if target is defined else 'production' }}"
+  vars:
+    backup_oci_path: /usr/local/bin/backup-oci-bv.sh
+  roles:
+    - role: dockercomposeservice
+      vars:
+        dockercomposeservice_name: wallabag
+    - role: dockercomposeservice
+      vars:
+        dockercomposeservice_name: mealie
+    - role: dockercomposeservice
+      vars:
+        dockercomposeservice_name: freshrss
+    - role: dockercomposeservice
+      vars:
+        dockercomposeservice_name: recycling
+    - role: dockercomposeservice
+      vars:
+        dockercomposeservice_name: vaultwarden

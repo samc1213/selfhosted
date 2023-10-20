@@ -44,6 +44,7 @@ THIS_INSTANCE=$(/home/sam/bin/oci compute instance list | jq -r '.data[0].id')
 
 NEW_VOLUME_ATTACHMENT_DATA=$(/home/sam/bin/oci compute volume-attachment attach-iscsi-volume  --instance-id "$THIS_INSTANCE" --volume-id "$NEW_VOLUME_ID" --is-agent-auto-iscsi-login-enabled true --wait-for-state ATTACHED)
 NEW_VOLUME_ATTACHMENT_IQN=$(echo $NEW_VOLUME_ATTACHMENT_DATA  | jq -r '.data.iqn')
+# TODO: Can you force the OS to refresh this?
 while ! sudo ls /dev/disk/by-path/*${NEW_VOLUME_ATTACHMENT_IQN}* > /dev/null; do
     echo "Disk still not attached. Waiting...";
     sleep 5
