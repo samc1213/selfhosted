@@ -1,0 +1,28 @@
+server {
+    server_name {{ nginx_server_name }}.samacohen.com;
+
+    location / { 
+        proxy_pass http://localhost:{{ nginx_server_local_port }};
+    }
+    listen 443 ssl;
+    ssl_certificate /etc/letsencrypt/live/samacohen.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/samacohen.com/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+}
+
+server {
+    if ($host = {{ nginx_server_name }}.samacohen.com) {
+        return 301 https://$host$request_uri;
+    }
+
+
+    server_name {{ nginx_server_name }}.samacohen.com;
+    listen 80;
+    return 404;
+}
+
+server {
+    server_name www.{{ nginx_server_name }}.samacohen.com;
+    return 301 $scheme://{{ nginx_server_name}}.samacohen.com$request_uri;
+}

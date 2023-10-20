@@ -1,20 +1,52 @@
 - name: Setup services
   hosts: "{{ target if target is defined else 'production' }}"
   vars:
-    backup_oci_path: /usr/local/bin/backup-oci-bv.sh
-  roles:
-    - role: dockercomposeservice
+    services:
+      - name: bitwarden
+        internalport: 8280
+      - name: freshrss
+        internalport: 8281
+      - name: wallabag
+        internalport: 8282
+      - name: mealie
+        internalport: 8283
+      - name: recycling
+        internalport: 3000
+  tasks:
+    - name: Add docker compose services
+      ansible.builtin.include_role:
+        name: dockercomposeservice
       vars:
-        dockercomposeservice_name: wallabag
-    - role: dockercomposeservice
+        dockercomposeservice_name: "{{ item.name }}"
+      loop:
+        "{{ services }}"
+    - name: Add nginx configurations
+      become: true
+      become_user: root
+      ansible.builtin.template:
+        src: templates/nginx_server.j2
+        dest: "/etc/nginx/sites-available/{{ item.name }}"
+        mode: '777'
       vars:
-        dockercomposeservice_name: mealie
-    - role: dockercomposeservice
-      vars:
-        dockercomposeservice_name: freshrss
-    - role: dockercomposeservice
-      vars:
-        dockercomposeservice_name: recycling
-    - role: dockercomposeservice
-      vars:
-        dockercomposeservice_name: vaultwarden
+        nginx_server_name: "{{ item.name }}"
+        nginx_server_local_port: "{{ item.internalport }}"
+      loop:
+        "{{ services }}"
+    - name: Make nginx sites enabled
+      become: true
+      become_user: root
+      ansible.builtin.file:
+        src: /etc/nginx/sites-available/{{ item.name }}
+        dest: /etc/nginx/sites-enabled/{{ item.name }}
+        state: link
+      loop:
+        "{{ services }}"
+      notify:
+        - Reload nginx
+
+  handlers:
+    - name: Reload nginx
+      become: true
+      become_user: root
+      ansible.builtin.command: nginx -s reload
+      changed_when: true

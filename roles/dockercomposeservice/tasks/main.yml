@@ -6,12 +6,12 @@
     mode: '755'
 - name: Check local compose jinja file
   delegate_to: localhost
-  stat:
+  ansible.builtin.stat:
     path: files/{{ dockercomposeservice_name }}-docker-compose.yml.j2
   register: stat_jinja_compose
 - name: Check local compose file
   delegate_to: localhost
-  stat:
+  ansible.builtin.stat:
     path: files/{{ dockercomposeservice_name }}-docker-compose.yml
   register: stat_compose
 - name: Copy Compose jinja file
