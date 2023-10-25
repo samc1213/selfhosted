@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  api:
+    image: vikunja/api
+    environment:
+      VIKUNJA_SERVICE_JWTSECRET: {{ vikunja_random_secret }}
+      VIKUNJA_SERVICE_FRONTENDURL: http://vikunja.samacohen.com/
+      # Note the default path is /app/vikunja/vikunja.db This moves to a different folder so you can use a volume and store this outside of the container so state is persisted even if container destroyed.
+      VIKUNJA_DATABASE_PATH: /db/vikunja.db
+    ports:
+      - 8285:3456
+    volumes:
+      - /blkstg/vikunja-data/files:/app/vikunja/files
+      - /blkstg/vikunja-data/db:/db
+    restart: unless-stopped

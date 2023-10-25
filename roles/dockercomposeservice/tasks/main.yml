@@ -34,3 +34,4 @@
     project_src: ~/compose/{{ dockercomposeservice_name }}
     files:
       - docker-compose.yml
+    remove_orphans: true

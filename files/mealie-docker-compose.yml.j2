@@ -1,28 +1,14 @@
 version: "3.7"
 services:
-  mealie-frontend:
-    image: hkotel/mealie:frontend-v1.0.0beta-5
-    container_name: mealie-frontend
-    environment:
-      - API_URL=http://mealie-api:9000
-
-    restart: unless-stopped
-    ports:
-      - "8283:3000" # 
-
-
-    volumes:
-      - /blkstg/mealie-data:/app/data/ # 
-
-
-  mealie-api:
-    image: hkotel/mealie:api-v1.0.0beta-5
-    container_name: mealie-api
+  mealie:
+    image: ghcr.io/mealie-recipes/mealie:v1.0.0-RC1.1
+    container_name: mealie
     deploy:
       resources:
         limits:
           memory: 1000M
-
+    ports:
+      - "8283:9000"
     volumes:
       - /blkstg/mealie-data:/app/data/
     environment:

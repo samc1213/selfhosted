@@ -10,6 +10,10 @@
         internalport: 8282
       - name: mealie
         internalport: 8283
+      - name: vikunja
+        internalport: 8284
+      - name: vikunja_backend
+        internalport: 8285
       - name: recycling
         internalport: 3000
   tasks:
