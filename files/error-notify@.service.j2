@@ -1,0 +1,9 @@
+[Unit]
+Description=Send email notifying error
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/bash -c 'echo -e "To: {{ email_user }}\nFrom: {{ email_user }}\nSubject: [SYSTEMD_%i] Failed!\n\nCheck on that service!" | sudo ssmtp {{ email_user }}'
+
+[Install]
+WantedBy=multi-user.target

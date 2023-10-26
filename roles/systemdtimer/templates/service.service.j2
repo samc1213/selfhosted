@@ -1,5 +1,6 @@
 [Unit]
 Description="{{ systemdtimer_servicename }}"
+OnFailure=error-notify@%i.service
 
 [Service]
 Type=oneshot
