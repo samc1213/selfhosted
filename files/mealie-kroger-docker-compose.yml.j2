@@ -1,0 +1,14 @@
+version: "2.4"
+
+services:
+  mealie-kroger:
+    image: ghcr.io/samc1213/mealie-kroger:master
+    container_name: mealie-kroger
+    ports:
+      - "8286:80"
+    restart: unless-stopped
+    environment:
+      MEALIE_URL: https://mealie.samacohen.com/
+      MEALIE_API_TOKEN: {{ mealie_api_token }}
+      KROGER_CLIENT_ID: {{ kroger_client_id }}
+      KROGER_CLIENT_SECRET: {{ kroger_client_secret }}
