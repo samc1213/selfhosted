@@ -3,6 +3,7 @@ set -e
 set -o pipefail
 # Inspired by https://blogs.oracle.com/developers/post/backing-up-your-always-free-vms-in-the-oracle-cloud
 TMP_BACKUP_NAME=$(date +%Y-%m-%d_%H-%M-%S)
+DAYS_TO_RETAIN=5
 
 echo "Running at ${TMP_BACKUP_NAME}."
 
@@ -58,6 +59,11 @@ sudo mount -t auto /dev/disk/by-path/*${NEW_VOLUME_ATTACHMENT_IQN}* /blkstgbak
 echo "Copying via rclone..."
 sudo rclone copy --fast-list --no-check-dest --ignore-size --transfers 24 --b2-chunk-size 256M /blkstgbak backblaze_oci_backup:oci-backup/${TMP_BACKUP_NAME} -v
 echo "Done copying"
+
+DATE_LESS_THAN=$(date -d "${DAYS_TO_RETAIN} days ago" +%Y-%m-%d)
+echo "Deleting files before ${DATE_LESS_THAN}..."
+sudo rclone lsd backblaze_oci_backup:oci-backup/ | awk -v date_less_than="${DATE_LESS_THAN}" '$5 < date_less_than {print $5}' | xargs -I '{}' bash -c 'sudo rclone purge backblaze_oci_backup:oci-backup/{}'
+echo "Done deleting old files"
 
 sudo umount /dev/disk/by-path/*${NEW_VOLUME_ATTACHMENT_IQN}*
 
