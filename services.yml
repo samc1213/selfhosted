@@ -2,22 +2,22 @@
   hosts: "{{ target if target is defined else 'production' }}"
   vars:
     services:
-      - name: bitwarden
-        internalport: 8280
-      - name: freshrss
-        internalport: 8281
-      - name: wallabag
-        internalport: 8282
+      # - name: bitwarden
+      #   internalport: 8280
+      # - name: freshrss
+      #   internalport: 8281
+      # - name: wallabag
+      #   internalport: 8282
       - name: mealie
         internalport: 8283
-      - name: vikunja
-        internalport: 8284
-      - name: vikunja_backend
-        internalport: 8285
-      - name: mealie-kroger
-        internalport: 8286
-      - name: recycling
-        internalport: 3000
+      # - name: vikunja
+      #   internalport: 8284
+      # - name: vikunja_backend
+      #   internalport: 8285
+      # - name: mealie-kroger
+      #   internalport: 8286
+      # - name: recycling
+      #   internalport: 3000
   tasks:
     - name: Add docker compose services
       ansible.builtin.include_role:

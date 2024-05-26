@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   mealie:
-    image: ghcr.io/mealie-recipes/mealie:v1.0.0-RC1.1
+    image: ghcr.io/mealie-recipes/mealie:v1.7.0
     container_name: mealie
     deploy:
       resources:
@@ -26,4 +26,6 @@ services:
       - SMTP_FROM_NAME={{ email_user }}
       - SMTP_USER={{ email_user }}
       - SMTP_PASSWORD={{ email_password }}
+      - OPENAI_API_KEY={{ openai_mealie_key }}
+      - OPENAI_MODEL=gpt-3.5-turbo
     restart: unless-stopped

@@ -23,3 +23,6 @@ graph
     end
         compute --> |backups| bb
 ```
+
+## Secrets
+To add a new secret, run `ansible-vault edit secrets_file.enc`.
