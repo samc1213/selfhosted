@@ -1,0 +1,70 @@
+- name: Setup services
+  hosts: "{{ target if target is defined else 'production' }}"
+  vars:
+    scripts:
+      - name: shotgunbot
+        oncalendar: "Tue *-*-* 09:00:00 America/Denver"
+        deps:
+          - GroupyAPI==0.10.3
+          - espn-api==0.37.1
+        script: shotgunbot.py
+        env_vars:
+          - GROUPME_ACCESS_TOKEN="{{ shotgunbot_groupme_access_token }}"
+          - ESPN_S2="{{ shotgunbot_espn_s2 }}"
+          - SWID="{{ shotgunbot_swid }}"
+  tasks:
+    - name: "Create pyscripts folder"
+      ansible.builtin.file:
+        path: /home/sam/pyscripts
+        state: directory
+    - name: "Create script folder"
+      ansible.builtin.file:
+        path: /home/sam/pyscripts/{{ item.name }}
+        state: directory
+      loop:
+        "{{ scripts }}"
+    - name: "Create venv"
+      ansible.builtin.command:
+        cmd: python3 -m venv {{ item.name }}-env
+        creates: /home/sam/pyscripts/{{ item.name }}/{{ item.name }}-env
+        chdir: /home/sam/pyscripts/{{ item.name }}
+      loop:
+        "{{ scripts }}"
+      remote_user: sam
+    - name: "Create requirements.txt"
+      ansible.builtin.copy:
+        content: "{{ item.deps | join('\n') }}\n"
+        dest: /home/sam/pyscripts/{{ item.name }}/requirements.txt
+      loop:
+        "{{ scripts }}"
+    - name: "Install requirements"
+      ansible.builtin.command:
+        cmd: "{{ item.name }}-env/bin/pip install -r requirements.txt"
+        chdir: /home/sam/pyscripts/{{ item.name }}
+      loop:
+        "{{ scripts }}"
+    - name: "Copy script"
+      ansible.builtin.template:
+        src: files/{{ item.script }}
+        dest: /home/sam/pyscripts/{{ item.name }}/{{ item.script }}
+        mode: '644'
+      loop:
+        "{{ scripts }}"
+    - name: "Create environmentfile"
+      ansible.builtin.copy:
+        content: "{{ item.env_vars | join('\n') }}\n"
+        dest: /home/sam/pyscripts/{{ item.name }}/env.txt
+      when: item.env_vars is defined
+      loop:
+        "{{ scripts }}"
+    - name: "Create systemdtimer"
+      with_items:
+        "{{ scripts }}"
+      include_role:
+        name: systemdtimer
+      vars:
+        systemdtimer_servicename: "{{ item.name }}"
+        systemdtimer_oncalendar:  "{{ item.oncalendar }}"
+        systemdtimer_command: /home/sam/pyscripts/{{ item.name }}/{{ item.name }}-env/bin/python /home/sam/pyscripts/{{ item.name }}/{{ item.script }}
+        systemdtimer_user: sam
+        systemdtimer_environmentfile: "/home/sam/pyscripts/{{ item.name }}/env.txt"

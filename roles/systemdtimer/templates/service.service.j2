@@ -4,7 +4,10 @@ OnFailure=error-notify@%i.service
 
 [Service]
 Type=oneshot
-ExecStart="{{ systemdtimer_command }}"
+ExecStart={{ systemdtimer_command }}
 {% if systemdtimer_user is defined %}
 User={{ systemdtimer_user }}
+{% endif %}
+{% if systemdtimer_environmentfile is defined %}
+EnvironmentFile={{ systemdtimer_environmentfile }}
 {% endif %}
