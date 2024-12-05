@@ -30,7 +30,7 @@
   ansible.builtin.fail:
   when: stat_jinja_compose.stat.exists is false and stat_compose.stat.exists is false
 - name: Create and start services
-  community.docker.docker_compose:
+  community.docker.docker_compose_v2:
     project_src: ~/compose/{{ dockercomposeservice_name }}
     files:
       - docker-compose.yml

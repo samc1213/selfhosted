@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
  recycling:
   image: ghcr.io/samc1213/recycling:denver

@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   frontend:
     image: vikunja/frontend
@@ -7,4 +5,4 @@ services:
     ports:
       - 8284:80
     environment:
-      VIKUNJA_API_URL: https://vikunja_backend.samacohen.com/api/v1
+      VIKUNJA_API_URL: https://vikunjabackend.samacohen.com/api/v1

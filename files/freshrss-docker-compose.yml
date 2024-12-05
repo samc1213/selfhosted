@@ -1,7 +1,4 @@
-version: "2.4"
-
 services:
-
   freshrss:
     image: freshrss/freshrss:custom
     container_name: freshrss

@@ -12,12 +12,14 @@
         internalport: 8283
       - name: vikunja
         internalport: 8284
-      - name: vikunja_backend
+      - name: vikunjabackend
         internalport: 8285
       - name: mealie-kroger
         internalport: 8286
       - name: recycling
         internalport: 3000
+      - name: nextcloud
+        internalport: 11000
   tasks:
     - name: Add docker compose services
       ansible.builtin.include_role:
@@ -45,6 +47,26 @@
         src: /etc/nginx/sites-available/{{ item.name }}
         dest: /etc/nginx/sites-enabled/{{ item.name }}
         state: link
+      loop:
+        "{{ services }}"
+      notify:
+        - Reload nginx
+    - name: Setup certbot
+      become: true
+      become_user: root
+      ansible.builtin.command:
+        cmd: certbot certonly --agree-tos --non-interactive --nginx -d {{ item.name  }}.samacohen.com
+      loop:
+        "{{ services }}"
+    - name: Add https to nginx
+      become: true
+      become_user: root
+      ansible.builtin.blockinfile:
+        block: "{{ lookup('ansible.builtin.template', './templates/nginx_server_https.j2') }}"
+        path: /etc/nginx/sites-enabled/{{ item.name }}
+      vars:
+        nginx_server_name: "{{ item.name }}"
+        nginx_server_local_port: "{{ item.internalport }}"
       loop:
         "{{ services }}"
       notify:
