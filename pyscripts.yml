@@ -12,6 +12,7 @@
           - GROUPME_ACCESS_TOKEN="{{ shotgunbot_groupme_access_token }}"
           - ESPN_S2="{{ shotgunbot_espn_s2 }}"
           - SWID="{{ shotgunbot_swid }}"
+        enabled: false
   tasks:
     - name: "Create pyscripts folder"
       ansible.builtin.file:
@@ -68,3 +69,4 @@
         systemdtimer_command: /home/sam/pyscripts/{{ item.name }}/{{ item.name }}-env/bin/python /home/sam/pyscripts/{{ item.name }}/{{ item.script }}
         systemdtimer_user: sam
         systemdtimer_environmentfile: "/home/sam/pyscripts/{{ item.name }}/env.txt"
+        systemdtimer_enabled: "{{ item.enabled }}"

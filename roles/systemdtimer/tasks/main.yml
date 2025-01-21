@@ -20,4 +20,4 @@
     name: "{{ systemdtimer_servicename }}.timer"
     state: started
     daemon_reload: true
-    enabled: true
+    enabled: "{{ systemdtimer_enabled | default(true) }}"
