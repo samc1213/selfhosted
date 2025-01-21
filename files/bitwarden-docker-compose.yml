@@ -1,7 +1,7 @@
 services:
   vaultwarden:
     container_name: vaultwarden
-    image: vaultwarden/server:1.32.2
+    image: vaultwarden/server:1.32.7
     restart: always
     ports:
       - '127.0.0.1:8280:80'
