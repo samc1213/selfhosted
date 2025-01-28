@@ -18,6 +18,6 @@
   become_user: root
   ansible.builtin.systemd:
     name: "{{ systemdtimer_servicename }}.timer"
-    state: started
     daemon_reload: true
     enabled: "{{ systemdtimer_enabled | default(true) }}"
+    state: "{{ 'started' if systemdtimer_enabled | default(true) else 'stopped' }}"
