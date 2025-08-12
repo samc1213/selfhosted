@@ -28,6 +28,11 @@
   when: stat_compose.stat.exists
 - name: Fail if no compose file
   ansible.builtin.fail:
+  msg: >
+    Neither compose file was found.
+    Expected at least one of:
+    - files/{{ dockercomposeservice_name }}-docker-compose.yml.j2 (jinja template)
+    - files/{{ dockercomposeservice_name }}-docker-compose.yml (plain file)
   when: stat_jinja_compose.stat.exists is false and stat_compose.stat.exists is false
 - name: Create and start services
   community.docker.docker_compose_v2:
