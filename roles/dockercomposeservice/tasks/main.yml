@@ -5,34 +5,32 @@
     state: directory
     mode: '755'
 - name: Check local compose jinja file
-  delegate_to: localhost
   ansible.builtin.stat:
-    path: files/{{ dockercomposeservice_name }}-docker-compose.yml.j2
+    path: '{{ playbook_dir }}/files/{{ dockercomposeservice_name }}-docker-compose.yml.j2'
   register: stat_jinja_compose
 - name: Check local compose file
-  delegate_to: localhost
   ansible.builtin.stat:
-    path: files/{{ dockercomposeservice_name }}-docker-compose.yml
+    path: '{{ playbook_dir }}/files/{{ dockercomposeservice_name }}-docker-compose.yml'
   register: stat_compose
 - name: Copy Compose jinja file
   ansible.builtin.template:
-    src: files/{{ dockercomposeservice_name }}-docker-compose.yml.j2
+    src: 'files/{{ dockercomposeservice_name }}-docker-compose.yml.j2'
     dest: ~/compose/{{ dockercomposeservice_name }}/docker-compose.yml
     mode: '644'
   when: stat_jinja_compose.stat.exists
 - name: Copy Compose file
   ansible.builtin.template:
-    src: files/{{ dockercomposeservice_name }}-docker-compose.yml
+    src: 'files/{{ dockercomposeservice_name }}-docker-compose.yml'
     dest: ~/compose/{{ dockercomposeservice_name }}/docker-compose.yml
     mode: '644'
   when: stat_compose.stat.exists
 - name: Fail if no compose file
   ansible.builtin.fail:
-  msg: >
-    Neither compose file was found.
-    Expected at least one of:
-    - files/{{ dockercomposeservice_name }}-docker-compose.yml.j2 (jinja template)
-    - files/{{ dockercomposeservice_name }}-docker-compose.yml (plain file)
+    msg: |
+      Neither compose file was found.
+      Expected at least one of:
+      - files/{{ dockercomposeservice_name }}-docker-compose.yml.j2 (jinja template)
+      - files/{{ dockercomposeservice_name }}-docker-compose.yml (plain file)
   when: stat_jinja_compose.stat.exists is false and stat_compose.stat.exists is false
 - name: Create and start services
   community.docker.docker_compose_v2:
