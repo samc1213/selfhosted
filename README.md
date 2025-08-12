@@ -26,3 +26,12 @@ graph
 
 ## Secrets
 To add a new secret, run `ansible-vault edit secrets_file.enc`.
+
+## Dependencies
+
+```bash
+python3 -m pip install --user pipx
+python3 -m pipx ensurepath
+pipx install --include-deps ansible --force
+ansible-galaxy collection install community.docker
+```
