@@ -58,6 +58,13 @@
         cmd: certbot certonly --agree-tos --non-interactive --nginx -d {{ item.name  }}.samacohen.com
       loop:
         "{{ services }}"
+    - name: Setup certbot renewal
+      import_role:
+        name: systemdtimer
+      vars:
+        systemdtimer_servicename: certbot-renew
+        systemdtimer_oncalendar: "*-*-* 10:00:00 America/Denver"
+        systemdtimer_command: certbot renew
     - name: Add https to nginx
       become: true
       become_user: root
