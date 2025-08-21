@@ -137,8 +137,7 @@ def post_mesage(message: str):
 def run_shotgunbot():
     kicker_message = get_kicker_message()
     full_message = 'SHOTGUNBOT: ' + kicker_message
-    print(full_message)
-    # post_mesage(message=full_message)
+    post_mesage(message=full_message)
 
 if __name__ == '__main__':
     run_shotgunbot()
