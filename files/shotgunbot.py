@@ -5,6 +5,9 @@ from random import randrange
 from groupy.client import Client
 from groupy import attachments
 import os
+from openai import OpenAI
+
+
 
 PALTRY_SYNONYMS = [
     "small",
@@ -41,7 +44,7 @@ PALTRY_SYNONYMS = [
 
 GROUPME_ACCESS_TOKEN=os.getenv("GROUPME_ACCESS_TOKEN")
 ESPN_S2=os.getenv("ESPN_S2")
-SWID= "{" + os.getenv("SWID") + "}"
+SWID= "{" + str(os.getenv("SWID")) + "}"
 
 @dataclass
 class KickerInfo:
@@ -53,14 +56,26 @@ def get_paltry_synonym() -> str:
     return PALTRY_SYNONYMS[randrange(len(PALTRY_SYNONYMS))]
 
 
-def get_message(loser: tuple[Team, KickerInfo]) -> str:
-    return f"{loser[0].team_name} ({loser[0].owners[0]['firstName']} {loser[0].owners[0]['lastName']})'s kicker, {loser[1].name}, put up a {get_paltry_synonym()} {loser[1].score} points this week. Time to shotgun!"
+def get_message(losers: list[tuple[Team, KickerInfo]]) -> str:
+    client = OpenAI()
+    
+    input = ""
+    for loser in losers:
+        input += f"{loser[0].team_name}'s kicker, {loser[1].name}, scored {loser[1].score} points this week. {loser[0].team_name}'s owner is {loser[0].owners[0]['firstName']} {loser[0].owners[0]['lastName']}. "
+
+    response = client.responses.create(
+        model="gpt-4o",
+        instructions="Your name is shotgunbot. You are in charge of writing a message for a fantasy football league. The message should be about the kicker who scored the least points in the previous week. The message should be funny and make fun of the kicker's poor performance and mention that the team's owner must shotgun a beer. The message will be sent immediately, so don't add any placeholders or things for me to fill in later. Use the provided information to create a humorous message. Ensure the team's owner's name is included in the message at least one, exactly as I provide it, with first and last name. If I mention multiple owners, there was a tie this week. You may look up information online about the last week in the NFL if needed.",
+        input=input,
+    )
+
+    return response.output_text
 
 
 def get_kicker_message() -> str:
     l = League(
         league_id=1070340,
-        year=2024,
+        year=2025,
         espn_s2=ESPN_S2,
         swid=SWID,
     )
@@ -97,21 +112,8 @@ def get_kicker_message() -> str:
         if kicker_info.score == min_kicker_points:
             losers.append((team, kicker_info))
 
-    if len(losers) == 1:
-        loser = losers[0]
-        return get_message(loser)
-    elif len(losers) > 1:
-        message = ""
-        first_time = True
-        for loser in losers:
-            if first_time:
-                prepend = ""
-            else:
-                prepend = "\n"
-            message += prepend + get_message(loser)
-
-            first_time = False
-        return message
+    if len(losers) >= 1:
+        return get_message(losers)
     else:
         raise ValueError("Cannot find loser. This is probably a bug")
 
@@ -135,7 +137,8 @@ def post_mesage(message: str):
 def run_shotgunbot():
     kicker_message = get_kicker_message()
     full_message = 'SHOTGUNBOT: ' + kicker_message
-    post_mesage(message=full_message)
+    print(full_message)
+    # post_mesage(message=full_message)
 
 if __name__ == '__main__':
     run_shotgunbot()
