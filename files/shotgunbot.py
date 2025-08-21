@@ -8,40 +8,6 @@ import os
 from openai import OpenAI
 
 
-
-PALTRY_SYNONYMS = [
-    "small",
-    "meager",
-    "trifling",
-    "insignificant",
-    "negligible",
-    "inadequate",
-    "insufficient",
-    "scant",
-    "scanty",
-    "derisory",
-    "pitiful",
-    "pitiable",
-    "pathetic",
-    "miserable",
-    "sorry",
-    "wretched",
-    "puny",
-    "trivial",
-    "beggarly",
-    "mean",
-    "ungenerous",
-    "inappreciable",
-    "mere",
-    "measly",
-    "piddling",
-    "piffling",
-    "mingy",
-    "dinky",
-    "poxy",
-    "exiguous",
-]
-
 GROUPME_ACCESS_TOKEN=os.getenv("GROUPME_ACCESS_TOKEN")
 ESPN_S2=os.getenv("ESPN_S2")
 SWID= "{" + str(os.getenv("SWID")) + "}"
@@ -50,10 +16,6 @@ SWID= "{" + str(os.getenv("SWID")) + "}"
 class KickerInfo:
     score: int
     name: str
-
-
-def get_paltry_synonym() -> str:
-    return PALTRY_SYNONYMS[randrange(len(PALTRY_SYNONYMS))]
 
 
 def get_message(losers: list[tuple[Team, KickerInfo]]) -> str:
