@@ -92,7 +92,10 @@ def post_mesage(message: str):
                 if name_idx != -1:
                     loci.append([name_idx, len(name)])
                     user_ids.append(user_id)
-            group.post(text=message, attachments=[attachments.Mentions(loci=loci, user_ids=user_ids)])
+            if user_ids:
+                group.post(text=message, attachments=[attachments.Mentions(loci=loci, user_ids=user_ids)])
+            else:
+                group.post(text=message)
 
 
 
