@@ -36,7 +36,8 @@ def get_message(losers: list[tuple[Team, KickerInfo]]) -> str:
         "The message will be sent immediately, so don't add any placeholders or things for me to fill in later. "
         "Use the provided information to create a humorous message. "
         "Ensure the team's owner's name is included in the message at least once, exactly as I provide it, with first and last name. "
-        "If I mention multiple owners, there was a tie this week."
+        "If I mention multiple owners, there was a tie this week. "
+        "Keep the message short. Just a few sentences at most."
     )
 
     response = client.chat.completions.create(
