@@ -46,5 +46,5 @@ jobs:
         run: |
           echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > .vault_pass
           chmod 600 .vault_pass
-          ansible-playbook -i inventory/hosts services.yml --vault-password-file .vault_pass --private-key ~/.ssh/deploy_key
+          ansible-playbook -i inventory/hosts services.yml --vault-password-file .vault_pass --private-key ~/.ssh/deploy_key -e @secrets_file.enc
           rm -f .vault_pass
