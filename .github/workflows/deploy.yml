@@ -29,6 +29,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install ansible-core
+          ansible-galaxy collection install community.docker
 
       - name: Run Ansible playbook
         run: |
