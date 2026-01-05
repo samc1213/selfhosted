@@ -8,10 +8,14 @@
   ansible.builtin.stat:
     path: '{{ playbook_dir }}/files/{{ dockercomposeservice_name }}-docker-compose.yml.j2'
   register: stat_jinja_compose
+  delegate_to: localhost
+  become: false
 - name: Check local compose file
   ansible.builtin.stat:
     path: '{{ playbook_dir }}/files/{{ dockercomposeservice_name }}-docker-compose.yml'
   register: stat_compose
+  delegate_to: localhost
+  become: false
 - name: Copy Compose jinja file
   ansible.builtin.template:
     src: 'files/{{ dockercomposeservice_name }}-docker-compose.yml.j2'
