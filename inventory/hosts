@@ -1,2 +1,2 @@
 [production]
-samacohen
+samacohen ansible_user=sam
