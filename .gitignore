@@ -1,2 +1,4 @@
-inventory/
 .vscode/
+.vault_pass
+env/
+sbenv/
