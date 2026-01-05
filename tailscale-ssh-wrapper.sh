@@ -1,7 +1,6 @@
 #!/bin/bash
-# Filter out SSH options that tailscale ssh doesn't support and extract user/host
+# Filter out SSH options that tailscale ssh doesn't support
 
-user=""
 host=""
 args=()
 skip_next=false
@@ -12,22 +11,11 @@ for arg in "$@"; do
         continue
     fi
 
-    # Extract user from -o User=xxx
-    if [[ "$arg" =~ ^-oUser=(.+)$ ]] || [[ "$arg" =~ ^-o[[:space:]]*User=\"?([^\"]+)\"?$ ]]; then
-        user="${BASH_REMATCH[1]}"
-        continue
-    fi
-
-    # Skip -o, -F, -S options
-    if [[ "$arg" == -o* ]] || [[ "$arg" == -F* ]] || [[ "$arg" == -S* ]]; then
+    # Skip all -o, -F, -S, -v options
+    if [[ "$arg" == -o* ]] || [[ "$arg" == -F* ]] || [[ "$arg" == -S* ]] || [[ "$arg" =~ ^-v+$ ]]; then
         if [[ "$arg" == -o ]] || [[ "$arg" == -F ]] || [[ "$arg" == -S ]]; then
             skip_next=true
         fi
-        continue
-    fi
-
-    # Skip verbose flags
-    if [[ "$arg" =~ ^-v+$ ]]; then
         continue
     fi
 
@@ -40,11 +28,4 @@ for arg in "$@"; do
     args+=("$arg")
 done
 
-# Build the target (user@host or just host)
-if [ -n "$user" ]; then
-    target="${user}@${host}"
-else
-    target="${host}"
-fi
-
-exec tailscale ssh "$target" "${args[@]}"
+exec tailscale ssh "sam@${host}" "${args[@]}"
