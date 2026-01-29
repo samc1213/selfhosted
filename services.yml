@@ -16,6 +16,8 @@
         internalport: 8285
       - name: mealie-kroger
         internalport: 8286
+      - name: movie-wheel
+        internalport: 8287
       - name: recycling
         internalport: 3000
       - name: nextcloud

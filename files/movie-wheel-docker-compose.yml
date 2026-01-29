@@ -1,0 +1,8 @@
+services:
+  movie-wheel:
+    image: ghcr.io/samc1213/movie-wheel:latest
+    ports:
+      - "8287:3000"
+    environment:
+      - TMDB_TOKEN={{ tmdb_token }}
+
