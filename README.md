@@ -35,3 +35,16 @@ python3 -m pipx ensurepath
 pipx install --include-deps ansible --force
 ansible-galaxy collection install community.docker
 ```
+
+## Backup Failures
+If backup-oci-block fails due to an OCI issue or other issue, there may be an extra block volume lying around. To find it, run 
+
+```bash
+/home/sam/bin/oci bv volume list --lifecycle-state AVAILABLE
+```
+
+Find the temporary one (look at `time-created`, it's probably recent), and delete:
+
+```bash
+/home/sam/bin/oci bv volume delete --volume-id <volume-ocid> --force
+```
