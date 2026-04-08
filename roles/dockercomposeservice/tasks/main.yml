@@ -41,4 +41,5 @@
     project_src: ~/compose/{{ dockercomposeservice_name }}
     files:
       - docker-compose.yml
+    pull: always
     remove_orphans: true
