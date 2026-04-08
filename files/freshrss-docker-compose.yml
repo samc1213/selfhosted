@@ -1,6 +1,6 @@
 services:
   freshrss:
-    image: freshrss/freshrss:custom
+    image: freshrss/freshrss:1.28.1
     container_name: freshrss
     hostname: freshrss
     ports:
