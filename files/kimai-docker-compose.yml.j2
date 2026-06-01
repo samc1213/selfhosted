@@ -35,5 +35,5 @@ services:
       - ADMINMAIL={{ email_user }}
       - ADMINPASS={{ kimai_admin_pass }}
       - DATABASE_URL=mysql://kimaiuser:{{ kimai_db_password }}@kimai-db/kimai?charset=utf8mb4&serverVersion=8.3.0
-      - TRUSTED_HOSTS=kimai.samacohen.com,localhost,127.0.0.1
+      - TRUSTED_HOSTS=kimai.samacohen.com|localhost|127.0.0.1
       - TRUSTED_PROXIES=127.0.0.1,REMOTE_ADDR
