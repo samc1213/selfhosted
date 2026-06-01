@@ -24,6 +24,8 @@
         internalport: 11000
       - name: ghostfolio
         internalport: 3333
+      - name: kimai
+        internalport: 8288
   tasks:
     - name: Add docker compose services
       ansible.builtin.include_role:

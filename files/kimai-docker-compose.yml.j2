@@ -1,0 +1,39 @@
+services:
+  kimai-db:
+    image: mysql:8.3
+    container_name: kimai-db
+    restart: unless-stopped
+    command: --default-storage-engine innodb
+    volumes:
+      - /blkstg/kimai-mysql:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=kimai
+      - MYSQL_USER=kimaiuser
+      - MYSQL_PASSWORD={{ kimai_db_password }}
+      - MYSQL_ROOT_PASSWORD={{ kimai_db_root_password }}
+    healthcheck:
+      test: mysqladmin -uroot -p$$MYSQL_ROOT_PASSWORD ping -h 127.0.0.1 --silent
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  kimai:
+    image: kimai/kimai2:apache
+    container_name: kimai
+    restart: unless-stopped
+    depends_on:
+      kimai-db:
+        condition: service_healthy
+    ports:
+      - "8288:8001"
+    volumes:
+      - /blkstg/kimai-data/data:/opt/kimai/var/data
+      - /blkstg/kimai-data/plugins:/opt/kimai/var/plugins
+    environment:
+      - APP_SECRET={{ kimai_app_secret }}
+      - ADMINMAIL={{ email_user }}
+      - ADMINPASS={{ kimai_admin_pass }}
+      - DATABASE_URL=mysql://kimaiuser:{{ kimai_db_password }}@kimai-db/kimai?charset=utf8mb4&serverVersion=8.3.0
+      - TRUSTED_HOSTS=kimai.samacohen.com,localhost,127.0.0.1
+      - TRUSTED_PROXIES=127.0.0.1,REMOTE_ADDR
