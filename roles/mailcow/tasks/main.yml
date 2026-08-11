@@ -96,6 +96,19 @@
     mode: '644'
   notify: Recreate mailcow containers
 
+- name: Ensure roundcube config directory exists
+  ansible.builtin.file:
+    path: /blkstg/mailcow-dockerized/data/rc/config
+    state: directory
+    mode: '755'
+
+- name: Configure roundcube to trust dovecot's TLS cert by container name
+  ansible.builtin.copy:
+    src: roundcube-imap-tls.php
+    dest: /blkstg/mailcow-dockerized/data/rc/config/imap_conn_options.php
+    mode: '644'
+  notify: Recreate mailcow containers
+
 - name: Start mailcow
   community.docker.docker_compose_v2:
     project_src: /blkstg/mailcow-dockerized
