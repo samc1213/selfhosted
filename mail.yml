@@ -34,6 +34,18 @@
       ansible.builtin.command:
         cmd: certbot certonly --agree-tos --non-interactive --nginx -d mail.samacohen.com
 
+    - name: Copy the certbot cert into mailcow for IMAP/SMTP TLS
+      become: true
+      become_user: root
+      ansible.builtin.shell:
+        cmd: |
+          cp /etc/letsencrypt/live/mail.samacohen.com/fullchain.pem /blkstg/mailcow-dockerized/data/assets/ssl/cert.pem
+          cp /etc/letsencrypt/live/mail.samacohen.com/privkey.pem /blkstg/mailcow-dockerized/data/assets/ssl/key.pem
+          chown sam:sam /blkstg/mailcow-dockerized/data/assets/ssl/cert.pem /blkstg/mailcow-dockerized/data/assets/ssl/key.pem
+          chmod 664 /blkstg/mailcow-dockerized/data/assets/ssl/cert.pem /blkstg/mailcow-dockerized/data/assets/ssl/key.pem
+          cd /blkstg/mailcow-dockerized && docker compose restart postfix-mailcow dovecot-mailcow nginx-mailcow
+      changed_when: true
+
     - name: Add https to nginx for mail
       become: true
       become_user: root

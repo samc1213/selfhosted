@@ -80,3 +80,11 @@
       - docker-compose.yml
     pull: always
     remove_orphans: true
+
+- name: Deploy certbot renewal hook for mailcow's IMAP/SMTP cert
+  become: true
+  become_user: root
+  ansible.builtin.copy:
+    src: mailcow-cert-deploy-hook.sh
+    dest: /etc/letsencrypt/renewal-hooks/deploy/mailcow-cert.sh
+    mode: '755'
