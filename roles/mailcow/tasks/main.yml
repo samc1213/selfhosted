@@ -1,3 +1,13 @@
+- name: Ensure mailcow directory exists and is owned by sam
+  become: true
+  become_user: root
+  ansible.builtin.file:
+    path: /blkstg/mailcow-dockerized
+    state: directory
+    owner: sam
+    group: sam
+    mode: '755'
+
 - name: Clone mailcow-dockerized
   ansible.builtin.git:
     repo: https://github.com/mailcow/mailcow-dockerized.git
