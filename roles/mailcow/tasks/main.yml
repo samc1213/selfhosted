@@ -73,11 +73,35 @@
     mode: '600'
   notify: Restart mailcow postfix
 
+- name: Check for existing roundcube DB credentials
+  ansible.builtin.command:
+    cmd: grep -q '^DBROUNDCUBE=' mailcow.conf
+    chdir: /blkstg/mailcow-dockerized
+  register: roundcube_creds_check
+  failed_when: false
+  changed_when: false
+
+- name: Generate roundcube DB credentials
+  ansible.builtin.shell:
+    cmd: |
+      echo "DBROUNDCUBEROOT=$(openssl rand -hex 24)" >> mailcow.conf
+      echo "DBROUNDCUBE=$(openssl rand -hex 24)" >> mailcow.conf
+    chdir: /blkstg/mailcow-dockerized
+  when: roundcube_creds_check.rc != 0
+
+- name: Configure roundcube webmail
+  ansible.builtin.copy:
+    src: docker-compose.override.yml
+    dest: /blkstg/mailcow-dockerized/docker-compose.override.yml
+    mode: '644'
+  notify: Recreate mailcow containers
+
 - name: Start mailcow
   community.docker.docker_compose_v2:
     project_src: /blkstg/mailcow-dockerized
     files:
       - docker-compose.yml
+      - docker-compose.override.yml
     pull: always
     remove_orphans: true
 

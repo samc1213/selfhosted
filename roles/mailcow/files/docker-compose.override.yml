@@ -1,0 +1,45 @@
+services:
+  roundcube-db:
+    image: mariadb:10.11
+    restart: unless-stopped
+    volumes:
+      - roundcube-db:/var/lib/mysql/
+    environment:
+      TZ: ${TZ}
+      MYSQL_ROOT_PASSWORD: ${DBROUNDCUBEROOT}
+      MYSQL_DATABASE: roundcubemail
+      MYSQL_USER: roundcube
+      MYSQL_PASSWORD: ${DBROUNDCUBE}
+    networks:
+      mailcow-network:
+        aliases:
+          - roundcube-db
+
+  roundcube:
+    image: roundcube/roundcubemail:1.7.0-apache
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8291:80"
+    environment:
+      TZ: ${TZ}
+      ROUNDCUBEMAIL_DB_TYPE: mysql
+      ROUNDCUBEMAIL_DB_HOST: roundcube-db
+      ROUNDCUBEMAIL_DB_USER: roundcube
+      ROUNDCUBEMAIL_DB_PASSWORD: ${DBROUNDCUBE}
+      ROUNDCUBEMAIL_DB_NAME: roundcubemail
+      ROUNDCUBEMAIL_DEFAULT_HOST: dovecot-mailcow
+      ROUNDCUBEMAIL_SMTP_SERVER: postfix-mailcow
+      ROUNDCUBEMAIL_SMTP_PORT: 588
+    volumes:
+      - ./data/rc/main:/var/www/html
+      - ./data/rc/config:/var/roundcube/config
+    depends_on:
+      - roundcube-db
+      - dovecot-mailcow
+    networks:
+      mailcow-network:
+        aliases:
+          - roundcube
+
+volumes:
+  roundcube-db:
