@@ -49,6 +49,7 @@
     - { key: HTTPS_BIND, value: "127.0.0.1" }
     - { key: HTTPS_PORT, value: "8443" }
     - { key: SKIP_LETS_ENCRYPT, value: "y" }
+    - { key: IPV4_NETWORK, value: "172.23.1" }
   notify: Recreate mailcow containers
 
 - name: Ensure postfix conf directory exists
