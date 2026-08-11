@@ -50,6 +50,7 @@
     - { key: HTTPS_PORT, value: "8443" }
     - { key: SKIP_LETS_ENCRYPT, value: "y" }
     - { key: IPV4_NETWORK, value: "172.23.1" }
+    - { key: HTTP_REDIRECT, value: "n" }
   notify: Recreate mailcow containers
 
 - name: Ensure postfix conf directory exists
