@@ -1,0 +1,7 @@
+galaxy_info:
+  author: Sam Cohen
+  description: Deploy mailcow-dockerized with a Mailgun outbound relay
+
+  license: MIT
+
+  min_ansible_version: '2.1'

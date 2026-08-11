@@ -1,0 +1,82 @@
+- name: Ensure mailcow directory exists and is owned by sam
+  become: true
+  become_user: root
+  ansible.builtin.file:
+    path: /blkstg/mailcow-dockerized
+    state: directory
+    owner: sam
+    group: sam
+    mode: '755'
+
+- name: Clone mailcow-dockerized
+  ansible.builtin.git:
+    repo: https://github.com/mailcow/mailcow-dockerized.git
+    dest: /blkstg/mailcow-dockerized
+    version: master
+    force: true
+
+- name: Symlink .env to mailcow.conf
+  ansible.builtin.file:
+    src: mailcow.conf
+    dest: /blkstg/mailcow-dockerized/.env
+    state: link
+    force: true
+
+- name: Check for existing mailcow.conf
+  ansible.builtin.stat:
+    path: /blkstg/mailcow-dockerized/mailcow.conf
+  register: mailcow_conf_stat
+
+- name: Generate mailcow.conf
+  ansible.builtin.command:
+    cmd: bash generate_config.sh
+    chdir: /blkstg/mailcow-dockerized
+  environment:
+    MAILCOW_HOSTNAME: "{{ mailcow_hostname }}"
+    MAILCOW_TZ: America/Denver
+    SKIP_CLAMD: "n"
+    SKIP_BRANCH: "y"
+  when: not mailcow_conf_stat.stat.exists
+
+- name: Configure mailcow.conf overrides
+  ansible.builtin.lineinfile:
+    path: /blkstg/mailcow-dockerized/mailcow.conf
+    regexp: '^{{ item.key }}='
+    line: "{{ item.key }}={{ item.value }}"
+  loop:
+    - { key: HTTP_PORT, value: "8290" }
+    - { key: HTTP_BIND, value: "127.0.0.1" }
+    - { key: HTTPS_BIND, value: "127.0.0.1" }
+    - { key: HTTPS_PORT, value: "8443" }
+    - { key: SKIP_LETS_ENCRYPT, value: "y" }
+    - { key: IPV4_NETWORK, value: "172.23.1" }
+    - { key: HTTP_REDIRECT, value: "n" }
+  notify: Recreate mailcow containers
+
+- name: Ensure postfix conf directory exists
+  ansible.builtin.file:
+    path: /blkstg/mailcow-dockerized/data/conf/postfix
+    state: directory
+    mode: '755'
+
+- name: Configure postfix relay
+  ansible.builtin.template:
+    src: extra.cf.j2
+    dest: /blkstg/mailcow-dockerized/data/conf/postfix/extra.cf
+    mode: '644'
+  notify: Restart mailcow postfix
+
+- name: Configure postfix relay credentials
+  ansible.builtin.template:
+    src: sasl_passwd.j2
+    dest: /blkstg/mailcow-dockerized/data/conf/postfix/sasl_passwd
+    mode: '600'
+  notify: Restart mailcow postfix
+
+- name: Start mailcow
+  community.docker.docker_compose_v2:
+    project_src: /blkstg/mailcow-dockerized
+    files:
+      - docker-compose.yml
+    pull: always
+    remove_orphans: true

@@ -1,0 +1,51 @@
+- name: Setup mailcow
+  hosts: "{{ target if target is defined else 'production' }}"
+  vars:
+    mailcow_hostname: mail.samacohen.com
+  tasks:
+    - name: Deploy mailcow
+      ansible.builtin.include_role:
+        name: mailcow
+
+    - name: Add nginx configuration for mail
+      become: true
+      become_user: root
+      ansible.builtin.template:
+        src: templates/nginx_server.j2
+        dest: /etc/nginx/sites-available/mail
+        mode: '777'
+      vars:
+        nginx_server_name: mail
+        nginx_server_local_port: 8290
+
+    - name: Make nginx site enabled for mail
+      become: true
+      become_user: root
+      ansible.builtin.file:
+        src: /etc/nginx/sites-available/mail
+        dest: /etc/nginx/sites-enabled/mail
+        state: link
+      notify:
+        - Reload nginx
+
+    - name: Setup certbot for mail
+      become: true
+      become_user: root
+      ansible.builtin.command:
+        cmd: certbot certonly --agree-tos --non-interactive --nginx -d mail.samacohen.com
+
+    - name: Add https to nginx for mail
+      become: true
+      become_user: root
+      ansible.builtin.blockinfile:
+        block: "{{ lookup('ansible.builtin.template', './templates/nginx_server_https_mail.j2') }}"
+        path: /etc/nginx/sites-enabled/mail
+      notify:
+        - Reload nginx
+
+  handlers:
+    - name: Reload nginx
+      become: true
+      become_user: root
+      ansible.builtin.command: nginx -s reload
+      changed_when: true

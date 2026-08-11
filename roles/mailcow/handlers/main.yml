@@ -1,0 +1,11 @@
+- name: Recreate mailcow containers
+  ansible.builtin.command:
+    cmd: docker compose up -d --force-recreate
+    chdir: /blkstg/mailcow-dockerized
+  changed_when: true
+
+- name: Restart mailcow postfix
+  ansible.builtin.command:
+    cmd: docker compose restart postfix-mailcow
+    chdir: /blkstg/mailcow-dockerized
+  changed_when: true
