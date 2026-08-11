@@ -55,6 +55,42 @@
       notify:
         - Reload nginx
 
+    - name: Add nginx configuration for roundcube
+      become: true
+      become_user: root
+      ansible.builtin.template:
+        src: templates/nginx_server.j2
+        dest: /etc/nginx/sites-available/roundcube
+        mode: '777'
+      vars:
+        nginx_server_name: roundcube
+        nginx_server_local_port: 8291
+
+    - name: Make nginx site enabled for roundcube
+      become: true
+      become_user: root
+      ansible.builtin.file:
+        src: /etc/nginx/sites-available/roundcube
+        dest: /etc/nginx/sites-enabled/roundcube
+        state: link
+      notify:
+        - Reload nginx
+
+    - name: Setup certbot for roundcube
+      become: true
+      become_user: root
+      ansible.builtin.command:
+        cmd: certbot certonly --agree-tos --non-interactive --nginx -d roundcube.samacohen.com
+
+    - name: Add https to nginx for roundcube
+      become: true
+      become_user: root
+      ansible.builtin.blockinfile:
+        block: "{{ lookup('ansible.builtin.template', './templates/nginx_server_https_roundcube.j2') }}"
+        path: /etc/nginx/sites-enabled/roundcube
+      notify:
+        - Reload nginx
+
   handlers:
     - name: Reload nginx
       become: true
