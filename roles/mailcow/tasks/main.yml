@@ -13,7 +13,7 @@
     repo: https://github.com/mailcow/mailcow-dockerized.git
     dest: /blkstg/mailcow-dockerized
     version: master
-    force: false
+    force: true
 
 - name: Symlink .env to mailcow.conf
   ansible.builtin.file:
