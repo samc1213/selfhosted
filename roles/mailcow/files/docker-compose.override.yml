@@ -27,7 +27,8 @@ services:
       ROUNDCUBEMAIL_DB_USER: roundcube
       ROUNDCUBEMAIL_DB_PASSWORD: ${DBROUNDCUBE}
       ROUNDCUBEMAIL_DB_NAME: roundcubemail
-      ROUNDCUBEMAIL_DEFAULT_HOST: dovecot-mailcow
+      ROUNDCUBEMAIL_DEFAULT_HOST: ssl://dovecot-mailcow
+      ROUNDCUBEMAIL_DEFAULT_PORT: 993
       ROUNDCUBEMAIL_SMTP_SERVER: postfix-mailcow
       ROUNDCUBEMAIL_SMTP_PORT: 588
     volumes:
