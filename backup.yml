@@ -9,6 +9,11 @@
         systemdtimer_oncalendar: "*-*-* 08:00:00 America/Denver"
         systemdtimer_command: "{{ backup_oci_path }}"
         systemdtimer_user: sam
+    - role: systemdtimer
+      vars:
+        systemdtimer_servicename: check-blkstg-mounted
+        systemdtimer_oncalendar: "*-*-* *:00:00"
+        systemdtimer_command: /usr/bin/mountpoint -q /blkstg
   tasks:
     - name: Install jq
       become: true
