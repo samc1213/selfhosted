@@ -26,6 +26,8 @@
         internalport: 3333
       - name: kimai
         internalport: 8288
+      - name: immich
+        internalport: 8289
   tasks:
     - name: Add docker compose services
       ansible.builtin.include_role:
