@@ -8,6 +8,12 @@ services:
       VIKUNJA_SERVICE_JWTSECRET: {{ vikunja_random_secret | replace('$', '$$') }}
       VIKUNJA_SERVICE_PUBLICURL: https://vikunja.samacohen.com/
       VIKUNJA_DATABASE_PATH: /db/vikunja.db
+      VIKUNJA_MAILER_ENABLED: true
+      VIKUNJA_MAILER_HOST: smtp.mailgun.org
+      VIKUNJA_MAILER_PORT: 587
+      VIKUNJA_MAILER_USERNAME: {{ mailgun_smtp_user }}
+      VIKUNJA_MAILER_PASSWORD: {{ mailgun_smtp_password | replace('$', '$$') }}
+      VIKUNJA_MAILER_FROMEMAIL: vikunja@samacohen.com
     volumes:
       - /blkstg/vikunja-data/files:/app/vikunja/files
       - /blkstg/vikunja-data/db:/db
