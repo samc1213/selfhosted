@@ -44,3 +44,62 @@ services:
 
 volumes:
   roundcube-db:
+    driver_opts:
+      type: none
+      device: /blkstg/mailcow-dockerized/data/docker-volumes/roundcube-db
+      o: bind
+  vmail-vol-1:
+    driver_opts:
+      type: none
+      device: /blkstg/mailcow-dockerized/data/docker-volumes/vmail-vol-1
+      o: bind
+  vmail-index-vol-1:
+    driver_opts:
+      type: none
+      device: /blkstg/mailcow-dockerized/data/docker-volumes/vmail-index-vol-1
+      o: bind
+  mysql-vol-1:
+    driver_opts:
+      type: none
+      device: /blkstg/mailcow-dockerized/data/docker-volumes/mysql-vol-1
+      o: bind
+  redis-vol-1:
+    driver_opts:
+      type: none
+      device: /blkstg/mailcow-dockerized/data/docker-volumes/redis-vol-1
+      o: bind
+  rspamd-vol-1:
+    driver_opts:
+      type: none
+      device: /blkstg/mailcow-dockerized/data/docker-volumes/rspamd-vol-1
+      o: bind
+  postfix-vol-1:
+    driver_opts:
+      type: none
+      device: /blkstg/mailcow-dockerized/data/docker-volumes/postfix-vol-1
+      o: bind
+  postfix-tlspol-vol-1:
+    driver_opts:
+      type: none
+      device: /blkstg/mailcow-dockerized/data/docker-volumes/postfix-tlspol-vol-1
+      o: bind
+  crypt-vol-1:
+    driver_opts:
+      type: none
+      device: /blkstg/mailcow-dockerized/data/docker-volumes/crypt-vol-1
+      o: bind
+  sogo-web-vol-1:
+    driver_opts:
+      type: none
+      device: /blkstg/mailcow-dockerized/data/docker-volumes/sogo-web-vol-1
+      o: bind
+  sogo-userdata-backup-vol-1:
+    driver_opts:
+      type: none
+      device: /blkstg/mailcow-dockerized/data/docker-volumes/sogo-userdata-backup-vol-1
+      o: bind
+  clamd-db-vol-1:
+    driver_opts:
+      type: none
+      device: /blkstg/mailcow-dockerized/data/docker-volumes/clamd-db-vol-1
+      o: bind
