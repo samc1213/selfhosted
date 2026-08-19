@@ -1,8 +1,13 @@
 services:
-  frontend:
-    image: vikunja/frontend
+  vikunja:
+    image: vikunja/vikunja
     restart: unless-stopped
     ports:
-      - 8284:80
+      - 8284:3456
     environment:
-      VIKUNJA_API_URL: https://vikunjabackend.samacohen.com/api/v1
+      VIKUNJA_SERVICE_JWTSECRET: {{ vikunja_random_secret | replace('$', '$$') }}
+      VIKUNJA_SERVICE_PUBLICURL: https://vikunja.samacohen.com/
+      VIKUNJA_DATABASE_PATH: /db/vikunja.db
+    volumes:
+      - /blkstg/vikunja-data/files:/app/vikunja/files
+      - /blkstg/vikunja-data/db:/db

@@ -12,8 +12,6 @@
         internalport: 8283
       - name: vikunja
         internalport: 8284
-      - name: vikunjabackend
-        internalport: 8285
       - name: mealie-kroger
         internalport: 8286
       - name: movie-wheel
