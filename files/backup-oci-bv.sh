@@ -68,7 +68,21 @@ echo "Done deleting old files"
 sudo umount /dev/disk/by-path/*${NEW_VOLUME_ATTACHMENT_IQN}*
 
 NEW_VOLUME_ATTACHMENT_ID=$(echo $NEW_VOLUME_ATTACHMENT_DATA | jq -r '.data.id')
-/home/sam/bin/oci compute volume-attachment detach --volume-attachment-id $NEW_VOLUME_ATTACHMENT_ID --wait-for-state DETACHED --force
+set +e
+DETACH_OUTPUT=$(/home/sam/bin/oci compute volume-attachment detach --volume-attachment-id $NEW_VOLUME_ATTACHMENT_ID --wait-for-state DETACHED --force 2>&1)
+DETACH_EXIT=$?
+set -e
+if [ $DETACH_EXIT -ne 0 ]; then
+    # The Block Volume Management agent can auto-detach the iSCSI attachment
+    # right after umount, racing with this explicit detach call. Treat that
+    # as success so we still reach volume delete below and don't orphan it.
+    if echo "$DETACH_OUTPUT" | grep -q "is not currently attached"; then
+        echo "Volume attachment already detached, continuing..."
+    else
+        echo "$DETACH_OUTPUT"
+        exit 4
+    fi
+fi
 /home/sam/bin/oci bv volume delete --volume-id $NEW_VOLUME_ID --wait-for-state TERMINATED --force
 
 echo "Done with backup"
