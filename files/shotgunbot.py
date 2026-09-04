@@ -1,7 +1,7 @@
 from espn_api.football import League, Team
 from dataclasses import dataclass
 from sys import maxsize
-from random import randrange
+import random
 import os
 import requests
 from openai import OpenAI
@@ -20,7 +20,18 @@ class KickerInfo:
     score: int
     name: str
 
-def get_message(losers: list[tuple[Team, KickerInfo]]) -> str:
+COMEDIC_DEVICES = [
+    "a mock breaking-news headline",
+    "a backhanded compliment",
+    "a roast of their entire draft-day strategy",
+    "a dramatic threat of what's coming next week",
+    "a courtroom verdict handed down by a judge",
+    "a doctor's diagnosis for the owner's condition",
+    "an obituary-style eulogy for the kicker's performance",
+    "a suggestion for a better way to spend the owner's time",
+]
+
+def get_message(losers: list[tuple[Team, KickerInfo]], year: int, week: int) -> str:
     client = OpenAI(api_key=OPENAI_API_KEY)
 
     user_input = ""
@@ -30,15 +41,25 @@ def get_message(losers: list[tuple[Team, KickerInfo]]) -> str:
             f"{loser[0].team_name}'s owner is {loser[0].owners[0]['firstName']} {loser[0].owners[0]['lastName']}. "
         )
 
+    # Shuffle once per season (seeded by year) and cycle through without repeats
+    # until the deck is exhausted, so back-to-back weeks never reuse a device.
+    season_order = random.Random(year).sample(COMEDIC_DEVICES, len(COMEDIC_DEVICES))
+    device = season_order[week % len(season_order)]
+
     system_prompt = (
-        "Your name is shotgunbot. You are in charge of writing a message for a fantasy football league. "
-        "The message should be about the kicker who scored the least points in the previous week. "
-        "The message should be funny and make fun of the kicker's poor performance and mention that the team's owner must shotgun a beer. "
+        "Your name is shotgunbot. You are the trash-talking hype man for a fantasy football league group chat. "
+        "Every week you write a message roasting whichever kicker scored the least points. "
+        "Be genuinely mean and cutting, not cutesy or gentle — go for the owner's ego, not just the kicker's stat line. "
+        "Insult the owner's life choices, football IQ, or general competence for starting (or benching) that kicker. Hold nothing back. "
+        "Avoid stock phrases or cliches. "
+        f"Deliver the roast in the style of {device} — commit to that format for the whole message. "
+        "Use emoji liberally to punch up the roast — the more chaotic and fun, the better. "
+        "End every message by declaring that the owner must shotgun a beer as punishment — don't just say 'must shotgun a beer' verbatim every time, find a fun, varied way to deliver that sentence. "
         "The message will be sent immediately, so don't add any placeholders or things for me to fill in later. "
-        "Use the provided information to create a humorous message. "
+        "Use the provided information to create the message. "
         "Ensure the team's owner's name is included in the message at least once, exactly as I provide it, with first and last name. "
-        "If I mention multiple owners, there was a tie this week. "
-        "Keep the message short. Just a few sentences at most."
+        "If I mention multiple owners, there was a tie this week — rip into all of them. "
+        "Keep the message short. Just two sentences at most."
     )
 
     response = client.chat.completions.create(
@@ -52,9 +73,10 @@ def get_message(losers: list[tuple[Team, KickerInfo]]) -> str:
     return response.choices[0].message.content
 
 def get_kicker_message() -> str:
+    year = 2026
     l = League(
         league_id=1070340,
-        year=2026,
+        year=year,
         espn_s2=ESPN_S2,
         swid=SWID,
     )
@@ -88,7 +110,7 @@ def get_kicker_message() -> str:
             losers.append((team, kicker_info))
 
     if losers:
-        return get_message(losers)
+        return get_message(losers, year, last_week)
     else:
         raise ValueError("Cannot find loser. This is probably a bug")
 
