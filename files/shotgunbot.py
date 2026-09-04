@@ -13,6 +13,7 @@ ESPN_S2 = os.getenv("ESPN_S2")
 SWID = "{" + str(os.getenv("SWID")) + "}"
 
 GROUPME_API_BASE = "https://api.groupme.com/v3"
+DRY_RUN = os.getenv("SHOTGUNBOT_DRY_RUN", "").lower() in ("1", "true", "yes")
 
 @dataclass
 class KickerInfo:
@@ -41,12 +42,11 @@ def get_message(losers: list[tuple[Team, KickerInfo]]) -> str:
     )
 
     response = client.chat.completions.create(
-        model="gpt-4o",
+        model="gpt-5.5",
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_input}
         ],
-        temperature=0.8,
     )
 
     return response.choices[0].message.content
@@ -54,7 +54,7 @@ def get_message(losers: list[tuple[Team, KickerInfo]]) -> str:
 def get_kicker_message() -> str:
     l = League(
         league_id=1070340,
-        year=2025,
+        year=2026,
         espn_s2=ESPN_S2,
         swid=SWID,
     )
@@ -117,6 +117,10 @@ def post_group_message(group_id: str, text: str, mentions=None):
 
 def post_message(message: str):
     target_group_id = '15618258'
+
+    if DRY_RUN:
+        print(f"[DRY RUN] Would post to group {target_group_id}:\n{message}")
+        return
 
     # Get members for mentions
     members = get_group_members(target_group_id)

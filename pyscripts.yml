@@ -5,8 +5,8 @@
       - name: shotgunbot
         oncalendar: "Tue *-*-* 09:00:00 America/Denver"
         deps:
-          - espn-api==0.45.1
-          - openai==1.107.0
+          - espn-api==0.46.0
+          - openai==3.8.0
         script: shotgunbot.py
         env_vars:
           - GROUPME_ACCESS_TOKEN="{{ shotgunbot_groupme_access_token }}"
