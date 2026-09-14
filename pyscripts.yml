@@ -13,7 +13,7 @@
           - ESPN_S2="{{ shotgunbot_espn_s2 }}"
           - SWID="{{ shotgunbot_swid }}"
           - OPENAI_API_KEY="{{ shotgunbot_openai_api_key }}"
-        enabled: false
+        enabled: true
   tasks:
     - name: "Create pyscripts folder"
       ansible.builtin.file:
