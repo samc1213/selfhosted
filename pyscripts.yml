@@ -25,6 +25,7 @@
         state: directory
       loop:
         "{{ scripts }}"
+      no_log: true
     - name: "Create venv"
       ansible.builtin.command:
         cmd: python3 -m venv {{ item.name }}-env
@@ -33,18 +34,21 @@
       loop:
         "{{ scripts }}"
       remote_user: sam
+      no_log: true
     - name: "Create requirements.txt"
       ansible.builtin.copy:
         content: "{{ item.deps | join('\n') }}\n"
         dest: /home/sam/pyscripts/{{ item.name }}/requirements.txt
       loop:
         "{{ scripts }}"
+      no_log: true
     - name: "Install requirements"
       ansible.builtin.command:
         cmd: "{{ item.name }}-env/bin/pip install -r requirements.txt"
         chdir: /home/sam/pyscripts/{{ item.name }}
       loop:
         "{{ scripts }}"
+      no_log: true
     - name: "Copy script"
       ansible.builtin.template:
         src: files/{{ item.script }}
@@ -52,6 +56,7 @@
         mode: '644'
       loop:
         "{{ scripts }}"
+      no_log: true
     - name: "Create environmentfile"
       ansible.builtin.copy:
         content: "{{ item.env_vars | join('\n') }}\n"
@@ -59,6 +64,7 @@
       when: item.env_vars is defined
       loop:
         "{{ scripts }}"
+      no_log: true
     - name: "Create systemdtimer"
       with_items:
         "{{ scripts }}"
@@ -71,3 +77,4 @@
         systemdtimer_user: sam
         systemdtimer_environmentfile: "/home/sam/pyscripts/{{ item.name }}/env.txt"
         systemdtimer_enabled: "{{ item.enabled }}"
+      no_log: true
