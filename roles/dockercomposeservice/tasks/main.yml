@@ -22,6 +22,7 @@
     dest: ~/compose/{{ dockercomposeservice_name }}/docker-compose.yml
     mode: '644'
   when: stat_jinja_compose.stat.exists
+  no_log: true
 - name: Copy Compose file
   ansible.builtin.template:
     src: 'files/{{ dockercomposeservice_name }}-docker-compose.yml'
