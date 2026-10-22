@@ -92,6 +92,13 @@
     mode: '600'
   notify: Restart mailcow postfix
 
+- name: Disable rspamd MX check (outbound port 25 is blocked)
+  ansible.builtin.copy:
+    src: rspamd-mx_check.conf
+    dest: /blkstg/mailcow-dockerized/data/conf/rspamd/override.d/mx_check.conf
+    mode: '644'
+  notify: Restart mailcow rspamd
+
 - name: Check for existing roundcube DB credentials
   ansible.builtin.command:
     cmd: grep -q '^DBROUNDCUBE=' mailcow.conf

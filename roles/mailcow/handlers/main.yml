@@ -9,3 +9,9 @@
     cmd: docker compose restart postfix-mailcow
     chdir: /blkstg/mailcow-dockerized
   changed_when: true
+
+- name: Restart mailcow rspamd
+  ansible.builtin.command:
+    cmd: docker compose restart rspamd-mailcow
+    chdir: /blkstg/mailcow-dockerized
+  changed_when: true
