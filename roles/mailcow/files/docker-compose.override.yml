@@ -16,7 +16,7 @@ services:
           - roundcube-db
 
   roundcube:
-    image: roundcube/roundcubemail:1.7.0-apache
+    image: roundcube/roundcubemail:1.7.5-apache
     restart: unless-stopped
     ports:
       - "127.0.0.1:8291:80"
