@@ -4,8 +4,10 @@
     services:
       - name: bitwarden
         internalport: 8280
+        public: true
       - name: freshrss
         internalport: 8281
+        password: true
       - name: wallabag
         internalport: 8282
       - name: mealie
@@ -34,6 +36,11 @@
         dockercomposeservice_name: "{{ item.name }}"
       loop:
         "{{ services }}"
+    - name: Add tailnet DNS for tailnet-only services
+      ansible.builtin.include_role:
+        name: dockercomposeservice
+      vars:
+        dockercomposeservice_name: tailnet-dns
     - name: Add nginx configurations
       become: true
       become_user: root
@@ -71,6 +78,30 @@
         systemdtimer_servicename: certbot-renew
         systemdtimer_oncalendar: "*-*-* 10:00:00 America/Denver"
         systemdtimer_command: certbot renew
+    - name: Add nginx tailnet-only allowlist snippet
+      become: true
+      become_user: root
+      ansible.builtin.copy:
+        src: templates/nginx_tailnet_only.conf
+        dest: /etc/nginx/snippets/tailnet-only.conf
+        mode: '644'
+      notify:
+        - Reload nginx
+    - name: Generate basic auth for password-protected services
+      become: true
+      become_user: root
+      ansible.builtin.shell:
+        cmd: |
+          pw=$(openssl rand -base64 24)
+          echo "sam:$(openssl passwd -apr1 "$pw")" > /etc/nginx/htpasswd-{{ item.name }}
+          chown root:www-data /etc/nginx/htpasswd-{{ item.name }}
+          chmod 640 /etc/nginx/htpasswd-{{ item.name }}
+          echo "user: sam" > /root/{{ item.name }}-basic-auth.txt
+          echo "password: $pw" >> /root/{{ item.name }}-basic-auth.txt
+          chmod 600 /root/{{ item.name }}-basic-auth.txt
+        creates: /etc/nginx/htpasswd-{{ item.name }}
+      loop: "{{ services | selectattr('password', 'defined') | selectattr('password') | list }}"
+      no_log: true
     - name: Add https to nginx
       become: true
       become_user: root
@@ -80,6 +111,8 @@
       vars:
         nginx_server_name: "{{ item.name }}"
         nginx_server_local_port: "{{ item.internalport }}"
+        nginx_public: "{{ item.public | default(false) }}"
+        nginx_password: "{{ item.password | default(false) }}"
       loop:
         "{{ services }}"
       notify:

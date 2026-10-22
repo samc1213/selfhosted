@@ -6,7 +6,7 @@ services:
       - /blkstg/immich-data:/data
       - /etc/localtime:/etc/localtime:ro
     ports:
-      - "8289:2283"
+      - "127.0.0.1:8289:2283"
     environment:
       DB_PASSWORD: {{ immich_db_password }}
       DB_USERNAME: postgres

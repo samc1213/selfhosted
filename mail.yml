@@ -82,6 +82,16 @@
       ansible.builtin.command:
         cmd: certbot certonly --agree-tos --non-interactive --nginx -d roundcube.samacohen.com
 
+    - name: Add nginx tailnet-only allowlist snippet
+      become: true
+      become_user: root
+      ansible.builtin.copy:
+        src: templates/nginx_tailnet_only.conf
+        dest: /etc/nginx/snippets/tailnet-only.conf
+        mode: '644'
+      notify:
+        - Reload nginx
+
     - name: Add https to nginx for roundcube
       become: true
       become_user: root

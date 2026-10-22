@@ -12,7 +12,7 @@ services:
       - SYMFONY__ENV__DOMAIN_NAME="https://wallabag.samacohen.com"
       - SYMFONY__ENV__FROM_EMAIL="wallabag@wallabag.samacohen.com"
     ports:
-      - "0.0.0.0:8282:80"
+      - "127.0.0.1:8282:80"
     volumes:
       - /blkstg/wallabag-data/data/:/var/www/wallabag/data
       - /blkstg/wallabag-data/images/:/var/www/wallabag/web/assets/images

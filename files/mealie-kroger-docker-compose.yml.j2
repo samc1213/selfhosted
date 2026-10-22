@@ -3,8 +3,10 @@ services:
     image: ghcr.io/samc1213/mealie-kroger:master
     container_name: mealie-kroger
     ports:
-      - "8286:80"
+      - "127.0.0.1:8286:80"
     restart: unless-stopped
+    extra_hosts:
+      - "mealie.samacohen.com:host-gateway"
     environment:
       MEALIE_URL: https://mealie.samacohen.com/
       MEALIE_API_TOKEN: {{ mealie_api_token }}

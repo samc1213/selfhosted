@@ -4,7 +4,7 @@ services:
     container_name: freshrss
     hostname: freshrss
     ports:
-      - "8281:80"
+      - "127.0.0.1:8281:80"
     restart: unless-stopped
     logging:
       options:

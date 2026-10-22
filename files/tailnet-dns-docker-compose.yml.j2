@@ -1,0 +1,31 @@
+# Split DNS for the tailnet: resolves tailnet-only services to this host's
+# Tailscale IP and forwards everything else. Configure it in the Tailscale
+# admin console as a nameserver restricted to samacohen.com.
+services:
+  tailnet-dns:
+    image: coredns/coredns:1.14.7
+    container_name: tailnet-dns
+    restart: unless-stopped
+    command: -conf /Corefile
+    ports:
+      - "{{ ansible_tailscale0.ipv4.address }}:53:53/udp"
+      - "{{ ansible_tailscale0.ipv4.address }}:53:53/tcp"
+    configs:
+      - source: corefile
+        target: /Corefile
+
+configs:
+  corefile:
+    content: |
+      samacohen.com {
+          hosts {
+{%- for s in services if not (s.public | default(false)) %}
+              {{ ansible_tailscale0.ipv4.address }} {{ s.name }}.samacohen.com
+{%- endfor %}
+              {{ ansible_tailscale0.ipv4.address }} roundcube.samacohen.com
+              fallthrough
+          }
+          forward . 1.1.1.1 9.9.9.9
+          cache 60
+          errors
+      }

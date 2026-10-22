@@ -3,7 +3,7 @@ services:
     image: vikunja/vikunja
     restart: unless-stopped
     ports:
-      - 8284:3456
+      - 127.0.0.1:8284:3456
     environment:
       VIKUNJA_SERVICE_JWTSECRET: {{ vikunja_random_secret | replace('$', '$$') }}
       VIKUNJA_SERVICE_PUBLICURL: https://vikunja.samacohen.com/
