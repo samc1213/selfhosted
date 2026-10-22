@@ -18,7 +18,7 @@ services:
       ACCESS_TOKEN_SALT: e2e7f796fc697561e876eaec8b7d960c32eb669d2698767f804b84ecf27c4a86
       JWT_SECRET_KEY: 0c478abfe64d2c7f4388e9e44c2143fe9ffbd249e196806aa9c8172c057f17d4
     ports:
-      - 3333:3333
+      - 127.0.0.1:3333:3333
     depends_on:
       postgres:
         condition: service_healthy

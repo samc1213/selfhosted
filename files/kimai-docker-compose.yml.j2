@@ -26,7 +26,7 @@ services:
       kimai-db:
         condition: service_healthy
     ports:
-      - "8288:8001"
+      - "127.0.0.1:8288:8001"
     volumes:
       - /blkstg/kimai-data/data:/opt/kimai/var/data
       - /blkstg/kimai-data/plugins:/opt/kimai/var/plugins
