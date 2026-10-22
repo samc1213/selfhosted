@@ -1,6 +1,6 @@
 services:
   wallabag:
-    image: wallabag/wallabag
+    image: wallabag/wallabag:2.6.14
     container_name: wallabag
     restart: unless-stopped
     environment:
@@ -16,7 +16,17 @@ services:
     volumes:
       - /blkstg/wallabag-data/data/:/var/www/wallabag/data
       - /blkstg/wallabag-data/images/:/var/www/wallabag/web/assets/images
+    configs:
+      # Mitigation for CVE-2026-109618/109619 (php2shell): wallabag still ships
+      # EOL PHP 8.1, which gets no upstream fix. Remove once wallabag rebuilds.
+      - source: php2shell-mitigation
+        target: /etc/php81/conf.d/99-php2shell-mitigation.ini
     healthcheck:
       test: ["CMD", "wget" ,"--no-verbose", "--tries=1", "--spider", "http://localhost"]
       interval: 1m
       timeout: 3s
+
+configs:
+  php2shell-mitigation:
+    content: |
+      session.upload_progress.enabled = Off
