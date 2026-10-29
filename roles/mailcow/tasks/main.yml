@@ -12,8 +12,11 @@
   ansible.builtin.git:
     repo: https://github.com/mailcow/mailcow-dockerized.git
     dest: /blkstg/mailcow-dockerized
-    version: master
+    version: "{{ mailcow_version }}"
     force: true
+  # force resets the tracked data/conf/postfix/main.cf, dropping the extra.cf
+  # overrides (Mailgun relayhost) that postfix appends on startup
+  notify: Restart mailcow postfix
 
 - name: Symlink .env to mailcow.conf
   ansible.builtin.file:
@@ -59,11 +62,12 @@
     state: directory
     mode: '755'
 
+# No mode/owner here: each container chowns its own volume (e.g. vmail to
+# 5000:5000 with setgid), and sam can't chmod those back
 - name: Ensure docker volume bind-mount directories exist
   ansible.builtin.file:
     path: "/blkstg/mailcow-dockerized/data/docker-volumes/{{ item }}"
     state: directory
-    mode: '755'
   loop:
     - vmail-vol-1
     - vmail-index-vol-1

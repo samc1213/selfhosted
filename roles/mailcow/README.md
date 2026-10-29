@@ -13,6 +13,7 @@ Runs mailcow-dockerized with its own nginx/ACME disabled (`SKIP_LETS_ENCRYPT=y`,
 Role Variables
 --------------
 
+* `mailcow_version`: mailcow-dockerized release tag to check out (e.g. `2026-10`). Upgrades happen only when this is bumped; the role does not use mailcow's `update.sh`, which always jumps to the latest release
 * `mailcow_hostname`: FQDN of the mail server itself (e.g. `mail.samacohen.com`), used as `MAILCOW_HOSTNAME`
 * `mailgun_smtp_user`: SMTP username from Mailgun, used as the Postfix relay auth user
 * `mailgun_smtp_password`: SMTP password from Mailgun, used as the Postfix relay auth password
@@ -24,6 +25,7 @@ Example Playbook
 - hosts: production
   vars:
     mailcow_hostname: mail.samacohen.com
+    mailcow_version: "2026-10"
   roles:
     - role: mailcow
 ```

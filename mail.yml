@@ -2,6 +2,10 @@
   hosts: "{{ target if target is defined else 'production' }}"
   vars:
     mailcow_hostname: mail.samacohen.com
+    # mailcow release tag (https://github.com/mailcow/mailcow-dockerized/releases).
+    # Bump deliberately after reading the release notes; deploying pulls the new
+    # images and recreates the changed containers.
+    mailcow_version: "2026-10"
   tasks:
     - name: Deploy mailcow
       ansible.builtin.include_role:
