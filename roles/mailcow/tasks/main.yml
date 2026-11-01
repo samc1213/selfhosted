@@ -96,10 +96,16 @@
     mode: '600'
   notify: Restart mailcow postfix
 
+# The rspamd container chowns override.d to its own user (101:102), so sam
+# can't write there
 - name: Disable rspamd MX check (outbound port 25 is blocked)
+  become: true
+  become_user: root
   ansible.builtin.copy:
     src: rspamd-mx_check.conf
     dest: /blkstg/mailcow-dockerized/data/conf/rspamd/override.d/mx_check.conf
+    owner: '101'
+    group: '102'
     mode: '644'
   notify: Restart mailcow rspamd
 
