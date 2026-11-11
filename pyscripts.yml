@@ -6,13 +6,11 @@
         oncalendar: "Tue *-*-* 09:00:00 America/Denver"
         deps:
           - espn-api==0.46.0
-          - openai==3.8.0
         script: shotgunbot.py
         env_vars:
           - GROUPME_ACCESS_TOKEN="{{ shotgunbot_groupme_access_token }}"
           - ESPN_S2="{{ shotgunbot_espn_s2 }}"
           - SWID="{{ shotgunbot_swid }}"
-          - OPENAI_API_KEY="{{ shotgunbot_openai_api_key }}"
         enabled: true
   tasks:
     - name: "Create pyscripts folder"
