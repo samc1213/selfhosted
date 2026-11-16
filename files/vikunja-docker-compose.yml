@@ -1,6 +1,6 @@
 services:
   vikunja:
-    image: vikunja/vikunja
+    image: vikunja/vikunja:2.7.1
     restart: unless-stopped
     ports:
       - 8284:3456

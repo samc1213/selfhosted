@@ -48,3 +48,11 @@ Find the temporary one (look at `time-created`, it's probably recent), and delet
 ```bash
 /home/sam/bin/oci bv volume delete --volume-id <volume-ocid> --force
 ```
+
+## Upgrades
+Every third-party image is pinned to a version, and so is mailcow (`mailcow_version` in `mail.yml`), so nothing upgrades unless a commit changes it. [Renovate](https://github.com/apps/renovate) (`renovate.json`) checks every Saturday morning and opens a PR for each new version; merging to `master` runs the deploy workflow.
+
+- Patch releases of low-risk images merge on their own.
+- Immich, mailcow, databases, and anything minor or major wait for review. Read the release notes first, and run a block volume backup before upgrading Immich, mailcow, or a database.
+- Database major versions are never proposed; those need a manual dump/restore.
+- Own images (`ghcr.io/samc1213/*`) and Immich's postgres image are not tracked.
