@@ -1,0 +1,6 @@
+{% include 'nginx_server.j2' %}
+{% if nginx_https_enabled %}
+
+
+{% include nginx_https_template %}
+{% endif %}
