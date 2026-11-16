@@ -3,6 +3,13 @@
     cmd: docker compose up -d --force-recreate
     chdir: /blkstg/mailcow-dockerized
   changed_when: true
+  notify: Restart mailcow SOGo and PHP-FPM
+
+- name: Restart mailcow SOGo and PHP-FPM
+  ansible.builtin.command:
+    cmd: docker compose restart sogo-mailcow php-fpm-mailcow
+    chdir: /blkstg/mailcow-dockerized
+  changed_when: true
 
 - name: Restart mailcow postfix
   ansible.builtin.command:
