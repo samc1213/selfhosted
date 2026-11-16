@@ -14,6 +14,7 @@
     dest: /blkstg/mailcow-dockerized
     version: "{{ mailcow_version }}"
     force: true
+  register: mailcow_clone
   # force resets the tracked data/conf/postfix/main.cf, dropping the extra.cf
   # overrides (Mailgun relayhost) that postfix appends on startup
   notify: Restart mailcow postfix
@@ -145,14 +146,29 @@
     mode: '644'
   notify: Recreate mailcow containers
 
+# Only pull when mailcow_version changes. mailcow's compose file uses floating
+# tags for some images (mariadb:10.11, memcached:alpine, ofelia:latest), so
+# pulling on every deploy recreated the database whenever upstream published a
+# patch, even for deploys that didn't touch mail
 - name: Start mailcow
   community.docker.docker_compose_v2:
     project_src: /blkstg/mailcow-dockerized
     files:
       - docker-compose.yml
       - docker-compose.override.yml
-    pull: always
+    pull: "{{ 'always' if mailcow_clone.before != mailcow_clone.after else 'missing' }}"
     remove_orphans: true
+  register: mailcow_up
+
+# SOGo and PHP-FPM keep long-lived MySQL connections and don't reconnect when
+# the database container is recreated or restarted ("Server has gone away"),
+# which locks users out of SOGo until they're restarted
+- name: Restart SOGo and PHP-FPM after containers changed
+  ansible.builtin.command:
+    cmd: docker compose restart sogo-mailcow php-fpm-mailcow
+    chdir: /blkstg/mailcow-dockerized
+  when: mailcow_up is changed
+  changed_when: true
 
 - name: Deploy certbot renewal hook for mailcow's IMAP/SMTP cert
   become: true
