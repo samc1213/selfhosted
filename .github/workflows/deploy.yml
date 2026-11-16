@@ -6,6 +6,12 @@ on:
       - master
   workflow_dispatch:
 
+# Queue deploys instead of running them side by side: two overlapping runs
+# fight over certbot's lock and fail halfway through
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
