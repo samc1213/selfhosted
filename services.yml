@@ -18,8 +18,6 @@
         internalport: 8287
       - name: recycling
         internalport: 3000
-      - name: nextcloud
-        internalport: 11000
       - name: ghostfolio
         internalport: 3333
       - name: kimai
