@@ -1,8 +1,49 @@
+{% if calshare_path is defined %}
+# Small cache so subscribers polling the shared calendar don't hit SOGo on
+# every request. Lives in http context (this block is appended after the
+# server blocks in sites-enabled/mail)
+proxy_cache_path /var/cache/nginx/calshare levels=1 keys_zone=calshare:1m max_size=10m inactive=1h use_temp_path=off;
+
+{% endif %}
 server {
     server_name mail.samacohen.com;
 
     client_max_body_size 50M;
 
+    # SOGo's built-in anonymous routes expose calendars at guessable URLs
+    # (they contain the account's email address). Always refuse them, whatever
+    # SOGoEnablePublicAccess is set to; the secret link below is the only
+    # unauthenticated way in. Matching runs on the normalized URI, so
+    # percent-encoding or dot segments don't get around it
+    location ~* ^/SOGo/(dav|so)/public(/|$) {
+        return 404;
+    }
+
+{% if calshare_path is defined %}
+    # Read-only, unauthenticated share link for the Personal calendar. nginx
+    # adds the SOGo credentials (a mailcow app password) only on this exact
+    # path; every other path, including the real .ics URL, still requires
+    # the caller to log in to SOGo themselves
+    location = /{{ calshare_path }} {
+        limit_except GET { deny all; }
+
+        proxy_pass http://localhost:8290/SOGo/dav/{{ calshare_user }}/Calendar/personal.ics;
+        proxy_set_header   Host $host;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+        proxy_set_header   Authorization "Basic {{ (calshare_user ~ ':' ~ calshare_app_password) | b64encode }}";
+        proxy_set_header   Cookie "";
+        proxy_hide_header  Set-Cookie;
+        proxy_hide_header  WWW-Authenticate;
+
+        proxy_cache calshare;
+        proxy_cache_valid 200 5m;
+        proxy_cache_use_stale error timeout updating http_500 http_502 http_503 http_504;
+        proxy_ignore_headers Cache-Control Expires Set-Cookie Vary;
+        add_header Cache-Control "private, max-age=300" always;
+        add_header X-Robots-Tag "noindex, nofollow" always;
+    }
+
+{% endif %}
     location / {
         proxy_pass http://localhost:8290;
         proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
