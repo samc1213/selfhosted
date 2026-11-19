@@ -56,6 +56,20 @@
       notify:
         - Restart mailcow TLS services
 
+    # Cache for the calendar share link in the mail nginx config
+    - name: Create nginx cache directory for the calendar share link
+      become: true
+      become_user: root
+      ansible.builtin.file:
+        path: /var/cache/nginx/calshare
+        state: directory
+        owner: www-data
+        group: root
+        mode: '700'
+      when: calshare_path is defined
+
+    # The shared calendar link only goes live once calshare_path,
+    # calshare_user and calshare_app_password are set in secrets_file.enc
     - name: Add https to nginx for mail
       become: true
       become_user: root
